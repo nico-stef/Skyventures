@@ -14,6 +14,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { login } from "../functions/authFunctions";
+import { Alert } from 'react-native';
+
 
 var animationDoneLogin = false;
 
@@ -63,6 +66,26 @@ export default function LoginScreen(props) {
       extrapolate: "clamp",
     }),
   };
+
+  const handleLogin = async () => {
+    if (!form.email || !form.password) {
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
+    }
+
+    try {
+      const result = await login(form.email, form.password);
+
+      if (result.error) {
+        Alert.alert('Login Failed', result.error);
+      } else {
+        Alert.alert('Success', `Welcome, ${result.email}`);
+      }
+    } catch (error) {
+      Alert.alert('Login Failed', error.message);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <LinearGradient
@@ -103,7 +126,7 @@ export default function LoginScreen(props) {
               placeholder="Password"
             />
 
-            <TouchableOpacity style={styles.loginButton}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginText}>Login</Text>
             </TouchableOpacity>
           </View>
