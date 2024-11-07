@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { register } from "../functions/authFunctions";
+import { Alert } from "react-native";
 
 var animationDoneRegister = false;
 
@@ -63,6 +65,26 @@ export default function RegisterScreen(props) {
       extrapolate: "clamp",
     }),
   };
+
+  const handleRegister = async () => {
+    if (!form.email || !form.password || !form.username) {
+      Alert.alert("Error", "Please complete all fields");
+      return;
+    }
+
+    try {
+      const result = await register(form.username, form.email, form.password);
+
+      if (result.error) {
+        Alert.alert("Register Failed", result.error);
+      } else {
+        Alert.alert("Success", `${result.message}`);
+      }
+    } catch (error) {
+      Alert.alert("Register Failed", error.message);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <LinearGradient
@@ -113,7 +135,10 @@ export default function RegisterScreen(props) {
               placeholder="Password"
             />
 
-            <TouchableOpacity style={styles.registerButton}>
+            <TouchableOpacity
+              style={styles.registerButton}
+              onPress={handleRegister}
+            >
               <Text style={styles.registerText}>Sign up</Text>
             </TouchableOpacity>
           </View>

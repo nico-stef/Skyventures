@@ -28,6 +28,16 @@ const register = async (req, res) => {
 
     await pool.execute(userSchema);
 
+    //check if user with the same email or username already exists
+    let [result] = await pool.query(`SELECT * FROM users WHERE email = ? OR username = ?`, [email, username]);
+    if (result.length > 0) {
+        if(result[0].email === email)
+            res.status(500).json({ message: "There is already a user created with this email" });
+        else
+            res.status(500).json({ message: "There is already a user created with this username" });
+        return;
+    }
+
     bcrypt.genSalt(saltRounds, (err, salt) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -93,10 +103,10 @@ const login = async (req, res) => {
                     iduser: userFound.userId,
                     email: userFound.email,
                     access_token: generateAccessToken(userFound.userId, userFound.email),
-                })
+                })//return an object with these atributes
             }
             else{
-                res.status(401).json({ message: "Incorrect password!"});
+                res.status(401).json({ message: "Incorrect password!"});//returns an object with property message
             }
         }
         else{
