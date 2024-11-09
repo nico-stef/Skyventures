@@ -1,22 +1,10 @@
 const { v4: uuid } = require("uuid"); //import v4 method and rename to uuid
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const pool = require('../config/db')
 const {userSchema} = require('../schemas/userSchema');
 require("dotenv").config(); 
 const saltRounds = 10;
 
-function generateAccessToken(idUser, email) {
-    const payload = {
-      idUser,
-      email
-    };
-    
-    const secret = process.env.JWT_SECRET;
-    const options = { expiresIn: '1d' };
-  
-    return jwt.sign(payload, secret, options);
-}
 
 const register = async (req, res) => {
     const { email, password, username } = req.body;
@@ -99,10 +87,10 @@ const login = async (req, res) => {
             const validate = await bcrypt.compare(req.body.password, userFound.password);
 
             if (validate) {
+                req.session.userId = userFound.userId; // Set session identifier
                 res.status(200).json({
                     iduser: userFound.userId,
-                    email: userFound.email,
-                    access_token: generateAccessToken(userFound.userId, userFound.email),
+                    email: userFound.email
                 })//return an object with these atributes
             }
             else{
@@ -117,7 +105,13 @@ const login = async (req, res) => {
     }
 }
 
+const home = async (req, res) => {
+    // this is only called when there is an authentication user due to isAuthenticated
+    res.json(`hello user ${req.session.userId}`);
+}
+
 module.exports = {
     register,
-    login
+    login,
+    home
 };
