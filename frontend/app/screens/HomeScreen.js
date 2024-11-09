@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -11,14 +11,32 @@ import {
   Keyboard,
   ScrollView,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import { SearchBar } from "@rneui/themed";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { Dropdown } from "react-native-element-dropdown";
+import * as Location from "expo-location";
+
 export default function HomeScreen(props) {
   const navigation = useNavigation();
 
   const [search, setSearch] = useState("");
+  const data = [
+    { label: "Restaurants", value: "restaurant" },
+    { label: "Hotels", value: "lodging" },
+    { label: "Cafes", value: "cafe" },
+    { label: "Parks", value: "park" },
+    { label: "Museums", value: "museum" },
+    { label: "Gyms", value: "gym" },
+    { label: "Hospitals", value: "hospital" },
+    { label: "Shops", value: "store" },
+  ];
+  const handlePlaceTypeSelection = (item) => {
+    setValue(item.value); // update selected value
+    // Navigate to NearbyPlaces with the selected place type
+    navigation.navigate("NearbyPlaces", { placeType: item.value });
+  };
 
+  const [value, setValue] = useState(null);
   const updateSearch = (search) => {
     setSearch(search);
   };
@@ -34,6 +52,13 @@ export default function HomeScreen(props) {
 
   const loadingProgress = this.loadingState.loadingProgress;
 
+  const [showSuggestions, setShowSuggestions] = useState(false); // Control visibility of suggestions
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current?.setAddressText("");
+  }, []);
+
   return (
     <SafeAreaView style={styles.background}>
       <View
@@ -41,7 +66,7 @@ export default function HomeScreen(props) {
           flexDirection: "row",
           width: "100%",
           justifyContent: "space-around",
-          flex: 0.15,
+          flex: 0.13,
         }}
       >
         <View style={styles.welcomeContainer}>
@@ -61,32 +86,110 @@ export default function HomeScreen(props) {
         </TouchableOpacity>
       </View>
 
-      <SearchBar
-        placeholder="Type Here..."
-        onChangeText={updateSearch}
-        lightTheme={true}
-        value={search}
-        placeholderTextColor={"#000"}
-        round={true}
-        containerStyle={styles.searchBarContainer}
-        inputContainerStyle={{ backgroundColor: "#f5f1f8" }}
-        inputStyle={{ color: "#000" }}
-      />
-
       <Text
         style={{
           fontSize: 22,
           fontWeight: "bold",
-          paddingVertical: 10,
+          paddingVertical: 5,
+          paddingBottom: 40,
           paddingLeft: 10,
         }}
       >
         Select your next trip
       </Text>
+      <View style={styles.autocompleteContainer}>
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={data}
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder="Select item"
+          searchPlaceholder="Search..."
+          value={value}
+          onChange={handlePlaceTypeSelection}
+        />
+      </View>
       <ScrollView
         style={styles.scrollableContainer}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.cardContainer}>
+          <Image
+            source={require("../assets/icon.png")}
+            style={{
+              width: "50%",
+              height: "100%",
+              resizeMode: "cover",
+              borderRadius: 20,
+            }}
+          />
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              paddingLeft: 10,
+            }}
+          >
+            <Text style={{ bottom: 20, fontSize: 16, fontWeight: "bold" }}>
+              Titlu la locatie mai lung sa vedem ce se intampla
+            </Text>
+            <Text style={{ fontSize: 14 }}>rating 4/5</Text>
+            <View style={{ top: 10, flexDirection: "row" }}>
+              <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
+                Tap to see more
+              </Text>
+              <Image
+                source={require("../assets/right-arrow.png")}
+                style={{
+                  width: 24,
+                  height: 24,
+                }}
+              />
+            </View>
+          </View>
+        </View>
+        <View style={styles.cardContainer}>
+          <Image
+            source={require("../assets/icon.png")}
+            style={{
+              width: "50%",
+              height: "100%",
+              resizeMode: "cover",
+              borderRadius: 20,
+            }}
+          />
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              paddingLeft: 10,
+            }}
+          >
+            <Text style={{ bottom: 20, fontSize: 16, fontWeight: "bold" }}>
+              Titlu la locatie mai lung sa vedem ce se intampla
+            </Text>
+            <Text style={{ fontSize: 14 }}>rating 4/5</Text>
+            <View style={{ top: 10, flexDirection: "row" }}>
+              <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
+                Tap to see more
+              </Text>
+              <Image
+                source={require("../assets/right-arrow.png")}
+                style={{
+                  width: 24,
+                  height: 24,
+                }}
+              />
+            </View>
+          </View>
+        </View>
         <View style={styles.cardContainer}>
           <Image
             source={require("../assets/icon.png")}
@@ -174,15 +277,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
   },
+  dropdown: {
+    margin: 10,
+    height: 40,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+
+    elevation: 2,
+  },
   scrollableContainer: {
     flex: 1.5,
     alignSelf: "center",
     width: "90%",
     alignContent: "center",
     marginBottom: 15,
+    marginTop: 10,
+    zIndex: 0,
   },
-  searchBarContainer: {
-    backgroundColor: "#fff",
+  autocompleteContainer: {
+    position: "absolute",
+    width: "100%",
+    top: 160,
+    zIndex: 1,
   },
   menuContainer: {
     flex: 0.2,
@@ -201,5 +321,32 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     padding: 10,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  item: {
+    padding: 17,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  textItem: {
+    flex: 1,
+    fontSize: 16,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
   },
 });
