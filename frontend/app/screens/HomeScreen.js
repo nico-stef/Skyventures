@@ -198,12 +198,14 @@ export default function HomeScreen(props) {
             style={{ width: 40, height: 40 }}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Image
-            source={require("../assets/compass.png")}
-            style={{ width: 40, height: 40 }}
-          />
+
+        <TouchableOpacity onPress={() => navigation.navigate('WeatherScreen')}>
+        <Image
+          source={require("../assets/compass.png")}
+          style={{ width: 40, height: 40 }}
+        />
         </TouchableOpacity>
+        
         <TouchableOpacity>
           <Image
             source={require("../assets/heart.png")}
