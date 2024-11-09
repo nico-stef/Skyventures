@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
@@ -11,7 +9,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-
+import { globalStyles } from "../styles/globalStyles";
 export default function StartScreen(props) {
   const navigation = useNavigation();
 
@@ -62,25 +60,25 @@ export default function StartScreen(props) {
       start={{ x: 0, y: 1 }}
       end={{ x: 1, y: 1 }}
       colors={["#004aad", "#886ae6"]}
-      style={styles.background}
+      style={globalStyles.backgroundStart}
     >
-      <SafeAreaView style={styles.logoContainer}>
+      <SafeAreaView style={globalStyles.logoContainerStart}>
         <Animated.View style={[opacityClearToVisible, moveDown]}>
           <Image
             source={require("../assets/skyventures-logo.png")}
-            style={styles.logo}
+            style={globalStyles.logoStart}
           />
-          <Text style={styles.logoText}>SkyVentures</Text>
+          <Text style={globalStyles.logoTextStart}>SkyVentures</Text>
         </Animated.View>
       </SafeAreaView>
 
-      <SafeAreaView style={styles.registerContainer}>
+      <SafeAreaView style={globalStyles.registerContainerStart}>
         <Animated.View style={[opacityClearToVisible, moveUp]}>
           <TouchableOpacity
-            style={styles.registerButton}
+            style={globalStyles.registerButtonStart}
             onPress={() => navigation.navigate("Register")}
           >
-            <Text style={styles.registerText}>Get Started</Text>
+            <Text style={globalStyles.registerTextStart}>Get Started</Text>
           </TouchableOpacity>
           <Button
             title="I already have an account"
@@ -92,50 +90,3 @@ export default function StartScreen(props) {
     </LinearGradient>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logoContainer: {
-    width: "100%",
-    flex: 1,
-    flexDirection: "column",
-    top: 180,
-  },
-  logo: {
-    width: 240,
-    height: 140,
-    alignSelf: "center",
-  },
-  logoText: {
-    fontSize: 50,
-    alignSelf: "center",
-    color: "lightgray",
-  },
-  registerContainer: {
-    flex: 1,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  registerButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 250,
-    height: 70,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 35,
-    elevation: 3,
-    backgroundColor: "lightgray",
-  },
-  registerText: {
-    fontSize: 35,
-  },
-});
