@@ -1,23 +1,70 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
-  Button,
   TouchableOpacity,
   Animated,
-  Keyboard,
   ScrollView,
+  FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { Dropdown } from "react-native-element-dropdown";
 import * as Location from "expo-location";
+import {
+  getNearbyPlaces,
+  getPlacePhotoUrl,
+} from "../functions/googlePlacesFunction";
+import { globalStyles } from "../styles/globalStyles";
 
 export default function HomeScreen(props) {
   const navigation = useNavigation();
+
+  const [placeType, setPlaceType] = useState(null); // Get placeType from route params
+  const [location, setLocation] = useState(null);
+  const [places, setPlaces] = useState([]);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      const location = await Location.getLastKnownPositionAsync(); // Use last known position
+      if (location) {
+        setLocation(location.coords);
+        fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
+      } else {
+        // Fall back to current position if last known is unavailable
+        const currentLocation = await Location.getCurrentPositionAsync();
+        setLocation(currentLocation.coords);
+        fetchNearbyPlaces(
+          currentLocation.coords.latitude,
+          currentLocation.coords.longitude
+        );
+      }
+    };
+
+    fetchLocation();
+  }, [placeType]);
+
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  const fetchNearbyPlaces = async (latitude, longitude) => {
+    setLoading(true); // Start loading
+    try {
+      const data = await getNearbyPlaces(latitude, longitude, placeType);
+      setPlaces(data.results.slice(0, 10));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
 
   const [search, setSearch] = useState("");
   const data = [
@@ -33,7 +80,7 @@ export default function HomeScreen(props) {
   const handlePlaceTypeSelection = (item) => {
     setValue(item.value); // update selected value
     // Navigate to NearbyPlaces with the selected place type
-    navigation.navigate("NearbyPlaces", { placeType: item.value });
+    setPlaceType(item.value);
   };
 
   const [value, setValue] = useState(null);
@@ -60,16 +107,9 @@ export default function HomeScreen(props) {
   }, []);
 
   return (
-    <SafeAreaView style={styles.background}>
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          justifyContent: "space-around",
-          flex: 0.13,
-        }}
-      >
-        <View style={styles.welcomeContainer}>
+    <SafeAreaView style={globalStyles.backgroundHome}>
+      <View style={globalStyles.userContainerHome}>
+        <View style={globalStyles.welcomeContainerHome}>
           <Text style={{ fontSize: 22, color: "#000" }}>Hello, User</Text>
           <Text style={{ fontSize: 16, color: "#888" }}>
             Welcome to Skyventures
@@ -86,24 +126,16 @@ export default function HomeScreen(props) {
         </TouchableOpacity>
       </View>
 
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: "bold",
-          paddingVertical: 5,
-          paddingBottom: 40,
-          paddingLeft: 10,
-        }}
-      >
+      <Text style={globalStyles.selectYourTripTextHome}>
         Select your next trip
       </Text>
-      <View style={styles.autocompleteContainer}>
+      <View style={globalStyles.autocompleteContainerHome}>
         <Dropdown
-          style={styles.dropdown}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          inputSearchStyle={styles.inputSearchStyle}
-          iconStyle={styles.iconStyle}
+          style={globalStyles.dropdownHome}
+          placeholderStyle={globalStyles.placeholderStyleHome}
+          selectedTextStyle={globalStyles.selectedTextStyleHome}
+          inputSearchStyle={globalStyles.inputSearchStyleHome}
+          iconStyle={globalStyles.iconStyleHome}
           data={data}
           maxHeight={300}
           labelField="label"
@@ -114,124 +146,52 @@ export default function HomeScreen(props) {
           onChange={handlePlaceTypeSelection}
         />
       </View>
-      <ScrollView
-        style={styles.scrollableContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.cardContainer}>
-          <Image
-            source={require("../assets/icon.png")}
-            style={{
-              width: "50%",
-              height: "100%",
-              resizeMode: "cover",
-              borderRadius: 20,
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              paddingLeft: 10,
-            }}
-          >
-            <Text style={{ bottom: 20, fontSize: 16, fontWeight: "bold" }}>
-              Titlu la locatie mai lung sa vedem ce se intampla
-            </Text>
-            <Text style={{ fontSize: 14 }}>rating 4/5</Text>
-            <View style={{ top: 10, flexDirection: "row" }}>
-              <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
-                Tap to see more
-              </Text>
+      <FlatList
+        style={globalStyles.scrollableContainerHome}
+        data={places}
+        keyExtractor={(item) => item.place_id}
+        renderItem={({ item }) => (
+          <View style={globalStyles.cardContainerHome}>
+            {item.photos && item.photos.length > 0 ? (
               <Image
-                source={require("../assets/right-arrow.png")}
-                style={{
-                  width: 24,
-                  height: 24,
+                source={{
+                  uri: getPlacePhotoUrl(
+                    item.photos[0].photo_reference,
+                    400,
+                    400
+                  ),
                 }}
+                style={globalStyles.placeToVisitImageContainerHome}
               />
+            ) : (
+              <View style={globalStyles.placeToVisitWithoutImageContainerHome}>
+                <Text>No Image</Text>
+              </View>
+            )}
+            <View style={globalStyles.cardContent}>
+              <Text style={globalStyles.placeName} numberOfLines={3}>
+                {item.name}
+              </Text>
+              <Text style={{ fontSize: 14 }}>
+                Rating: {item.rating || "N/A"}
+              </Text>
+              <View style={{ top: 10, flexDirection: "row" }}>
+                <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
+                  Tap to see more
+                </Text>
+                <Image
+                  source={require("../assets/right-arrow.png")}
+                  style={{
+                    width: 24,
+                    height: 24,
+                  }}
+                />
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styles.cardContainer}>
-          <Image
-            source={require("../assets/icon.png")}
-            style={{
-              width: "50%",
-              height: "100%",
-              resizeMode: "cover",
-              borderRadius: 20,
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              paddingLeft: 10,
-            }}
-          >
-            <Text style={{ bottom: 20, fontSize: 16, fontWeight: "bold" }}>
-              Titlu la locatie mai lung sa vedem ce se intampla
-            </Text>
-            <Text style={{ fontSize: 14 }}>rating 4/5</Text>
-            <View style={{ top: 10, flexDirection: "row" }}>
-              <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
-                Tap to see more
-              </Text>
-              <Image
-                source={require("../assets/right-arrow.png")}
-                style={{
-                  width: 24,
-                  height: 24,
-                }}
-              />
-            </View>
-          </View>
-        </View>
-        <View style={styles.cardContainer}>
-          <Image
-            source={require("../assets/icon.png")}
-            style={{
-              width: "50%",
-              height: "100%",
-              resizeMode: "cover",
-              borderRadius: 20,
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              paddingLeft: 10,
-            }}
-          >
-            <Text style={{ bottom: 20, fontSize: 16, fontWeight: "bold" }}>
-              Titlu la locatie mai lung sa vedem ce se intampla
-            </Text>
-            <Text style={{ fontSize: 14 }}>rating 4/5</Text>
-            <View style={{ top: 10, flexDirection: "row" }}>
-              <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
-                Tap to see more
-              </Text>
-              <Image
-                source={require("../assets/right-arrow.png")}
-                style={{
-                  width: 24,
-                  height: 24,
-                }}
-              />
-            </View>
-          </View>
-        </View>
-        <View style={styles.cardContainer} />
-        <View style={styles.cardContainer} />
-        <View style={styles.cardContainer} />
-        <View style={styles.cardContainer} />
-      </ScrollView>
-      <View style={styles.menuContainer}>
+        )}
+      />
+      <View style={globalStyles.menuContainerHome}>
         <TouchableOpacity>
           <Image
             source={require("../assets/home.png")}
@@ -254,99 +214,3 @@ export default function HomeScreen(props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  cardContainer: {
-    height: 150,
-    width: "100%",
-    backgroundColor: "red",
-    marginTop: 10,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "black",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  dropdown: {
-    margin: 10,
-    height: 40,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-
-    elevation: 2,
-  },
-  scrollableContainer: {
-    flex: 1.5,
-    alignSelf: "center",
-    width: "90%",
-    alignContent: "center",
-    marginBottom: 15,
-    marginTop: 10,
-    zIndex: 0,
-  },
-  autocompleteContainer: {
-    position: "absolute",
-    width: "100%",
-    top: 160,
-    zIndex: 1,
-  },
-  menuContainer: {
-    flex: 0.2,
-    width: "80%",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    padding: 5,
-    alignSelf: "center",
-    backgroundColor: "pink",
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "black",
-  },
-  welcomeContainer: {
-    flex: 1,
-    width: "100%",
-    padding: 10,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  item: {
-    padding: 17,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  textItem: {
-    flex: 1,
-    fontSize: 16,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-});

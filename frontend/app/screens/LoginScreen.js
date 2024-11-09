@@ -1,7 +1,6 @@
-import React, { useState, setState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
@@ -15,6 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { login } from "../functions/authFunctions";
+import { globalStyles } from "../styles/globalStyles";
 import { Alert } from "react-native";
 
 var animationDoneLogin = false;
@@ -91,25 +91,25 @@ export default function LoginScreen(props) {
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
         colors={["#004aad", "#886ae6"]}
-        style={styles.background}
+        style={globalStyles.backgroundLogin}
       >
-        <SafeAreaView style={styles.logoContainer}>
+        <SafeAreaView style={globalStyles.logoContainerLogin}>
           <Animated.View style={moveDown}>
             <Image
               source={require("../assets/skyventures-logo.png")}
-              style={styles.logo}
+              style={globalStyles.logoLogin}
             />
-            <Text style={styles.logoText}>Welcome Back</Text>
+            <Text style={globalStyles.logoTextLogin}>Welcome Back</Text>
           </Animated.View>
         </SafeAreaView>
 
         <Animated.View
-          style={[opacityClearToVisible, styles.loginContainter, ,]}
+          style={[opacityClearToVisible, globalStyles.loginContainterLogin, ,]}
         >
-          <View style={styles.credintialsContainer}>
+          <View style={globalStyles.credintialsContainerLogin}>
             <TextInput
               inputMode="email"
-              style={styles.inputControl}
+              style={globalStyles.inputControlLogin}
               autoCapitalize="no"
               autoCorrect={false}
               textContentType="oneTimeCode"
@@ -119,14 +119,17 @@ export default function LoginScreen(props) {
             />
             <TextInput
               secureTextEntry
-              style={styles.inputControl}
+              style={globalStyles.inputControlLogin}
               onChangeText={(password) => setForm({ ...form, password })}
               value={form.password}
               placeholder="Password"
             />
 
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginText}>Login</Text>
+            <TouchableOpacity
+              style={globalStyles.loginButtonLogin}
+              onPress={handleLogin}
+            >
+              <Text style={globalStyles.loginTextLogin}>Login</Text>
             </TouchableOpacity>
           </View>
 
@@ -140,69 +143,3 @@ export default function LoginScreen(props) {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  credintialsContainer: {
-    height: 220,
-    width: "100%",
-    justifyContent: "space-around",
-    bottom: 25,
-  },
-  loginContainter: {
-    flex: 1,
-    width: "100%",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-  },
-  logoContainer: {
-    width: "100%",
-    flex: 0.5,
-    flexDirection: "column",
-    top: 90,
-  },
-  logo: {
-    width: 240,
-    height: 140,
-    alignSelf: "center",
-  },
-  logoText: {
-    fontSize: 50,
-    alignSelf: "center",
-    color: "lightgray",
-  },
-
-  loginButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 250,
-    height: 70,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 35,
-    elevation: 3,
-    backgroundColor: "lightgray",
-    alignSelf: "center",
-    top: 10,
-  },
-  loginText: {
-    fontSize: 35,
-  },
-  inputControl: {
-    height: 50,
-    width: 250,
-    margin: 10,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
-    alignSelf: "center",
-    fontSize: 20,
-  },
-});

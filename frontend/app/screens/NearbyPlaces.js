@@ -4,12 +4,15 @@ import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
   SafeAreaView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import * as Location from "expo-location";
-import { getNearbyPlaces } from "./GooglePlacesService";
+import {
+  getNearbyPlaces,
+  getPlacePhotoUrl,
+} from "../functions/googlePlacesFunction";
 
 const NearbyPlaces = ({ route }) => {
   const { placeType } = route.params; // Get placeType from route params
@@ -49,7 +52,7 @@ const NearbyPlaces = ({ route }) => {
     setLoading(true); // Start loading
     try {
       const data = await getNearbyPlaces(latitude, longitude, placeType);
-      setPlaces(data.results);
+      setPlaces(data.results.slice(0, 10));
     } catch (err) {
       console.error(err);
     } finally {
@@ -69,6 +72,20 @@ const NearbyPlaces = ({ route }) => {
             <View
               style={{ padding: 10, borderBottomWidth: 1, borderColor: "#ccc" }}
             >
+              {item.photos && item.photos.length > 0 ? (
+                <Image
+                  source={{
+                    uri: getPlacePhotoUrl(
+                      item.photos[0].photo_reference,
+                      24,
+                      24
+                    ),
+                  }}
+                  style={{ width: 24, height: 24, borderRadius: 8 }}
+                />
+              ) : (
+                <Text>No photo available</Text>
+              )}
               <Text style={{ fontSize: 16, fontWeight: "600" }}>
                 {item.name}
               </Text>

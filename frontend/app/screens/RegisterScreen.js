@@ -1,7 +1,6 @@
-import React, { useState, setState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
@@ -15,6 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { register } from "../functions/authFunctions";
+import { globalStyles } from "../styles/globalStyles";
 import { Alert } from "react-native";
 
 var animationDoneRegister = false;
@@ -78,7 +78,7 @@ export default function RegisterScreen(props) {
       if (result.error) {
         Alert.alert("Register Failed", result.error);
       } else {
-        Alert.alert("Success", `${result.message}`);
+        navigation.navigate("Home");
       }
     } catch (error) {
       Alert.alert("Register Failed", error.message);
@@ -91,25 +91,29 @@ export default function RegisterScreen(props) {
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
         colors={["#004aad", "#886ae6"]}
-        style={styles.background}
+        style={globalStyles.backgroundRegister}
       >
-        <SafeAreaView style={styles.logoContainer}>
+        <SafeAreaView style={globalStyles.logoContainerRegister}>
           <Animated.View style={moveDown}>
             <Image
               source={require("../assets/skyventures-logo.png")}
-              style={styles.logo}
+              style={globalStyles.logoRegister}
             />
-            <Text style={styles.logoText}>Create Account</Text>
+            <Text style={globalStyles.logoTextRegister}>Create Account</Text>
           </Animated.View>
         </SafeAreaView>
 
         <Animated.View
-          style={[opacityClearToVisible, styles.registerContainter, ,]}
+          style={[
+            opacityClearToVisible,
+            globalStyles.registerContainterRegister,
+            ,
+          ]}
         >
-          <View style={styles.credintialsContainer}>
+          <View style={globalStyles.credintialsContainerRegister}>
             <TextInput
               inputMode="text"
-              style={styles.inputControl}
+              style={globalStyles.inputControlRegister}
               autoCapitalize="no"
               autoCorrect={false}
               textContentType="oneTimeCode"
@@ -119,7 +123,7 @@ export default function RegisterScreen(props) {
             />
             <TextInput
               inputMode="email"
-              style={styles.inputControl}
+              style={globalStyles.inputControlRegister}
               autoCorrect={false}
               autoCapitalize="no"
               textContentType="oneTimeCode"
@@ -129,17 +133,17 @@ export default function RegisterScreen(props) {
             />
             <TextInput
               secureTextEntry
-              style={styles.inputControl}
+              style={globalStyles.inputControlRegister}
               onChangeText={(password) => setForm({ ...form, password })}
               value={form.password}
               placeholder="Password"
             />
 
             <TouchableOpacity
-              style={styles.registerButton}
+              style={globalStyles.registerButtonRegister}
               onPress={handleRegister}
             >
-              <Text style={styles.registerText}>Sign up</Text>
+              <Text style={globalStyles.registerTextRegister}>Sign up</Text>
             </TouchableOpacity>
           </View>
 
@@ -155,69 +159,3 @@ export default function RegisterScreen(props) {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  credintialsContainer: {
-    height: 250,
-    width: "100%",
-    justifyContent: "space-around",
-    bottom: 50,
-  },
-  registerContainter: {
-    flex: 1,
-    width: "100%",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-  },
-  logoContainer: {
-    width: "100%",
-    flex: 0.5,
-    flexDirection: "column",
-    top: 80,
-  },
-  logo: {
-    width: 240,
-    height: 140,
-    alignSelf: "center",
-  },
-  logoText: {
-    fontSize: 50,
-    alignSelf: "center",
-    color: "lightgray",
-  },
-
-  registerButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 250,
-    height: 70,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 35,
-    elevation: 3,
-    backgroundColor: "lightgray",
-    alignSelf: "center",
-    top: 10,
-  },
-  registerText: {
-    fontSize: 35,
-  },
-  inputControl: {
-    height: 50,
-    width: 250,
-    margin: 10,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
-    alignSelf: "center",
-    fontSize: 20,
-  },
-});
