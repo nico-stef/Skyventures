@@ -6,8 +6,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import RegisterScreen from "./app/screens/RegisterScreen";
 import HomeScreen from "./app/screens/HomeScreen";
-
-import CustomPlacesSearch from "./app/screens/NearbyPlaces";
 import "react-native-get-random-values";
 import NearbyPlaces from "./app/screens/NearbyPlaces";
 import WeatherScreen from "./app/screens/WeatherScreen";
@@ -18,13 +16,14 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="Start"
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Start" component={StartScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+
         <Stack.Screen name="NearbyPlaces" component={NearbyPlaces} />
         <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
       </Stack.Navigator>
