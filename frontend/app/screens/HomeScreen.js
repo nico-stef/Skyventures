@@ -101,7 +101,6 @@ export default function HomeScreen(props) {
     loadingProgress: new Animated.Value(0),
   };
 
-
   return (
     <SafeAreaView style={globalStyles.backgroundHome}>
       <View style={globalStyles.userContainerHome}>
@@ -145,9 +144,13 @@ export default function HomeScreen(props) {
       <FlatList
         style={globalStyles.scrollableContainerHome}
         data={places}
+        showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.place_id}
         renderItem={({ item }) => (
-          <View style={globalStyles.cardContainerHome}>
+          <TouchableOpacity
+            style={globalStyles.cardContainerHome}
+            onPress={() => navigation.navigate("PlaceScreen", { place: item })}
+          >
             {item.photos && item.photos.length > 0 ? (
               <Image
                 source={{
@@ -165,11 +168,11 @@ export default function HomeScreen(props) {
               </View>
             )}
             <View style={globalStyles.cardContent}>
-              <Text style={globalStyles.placeName} numberOfLines={3}>
+              <Text style={globalStyles.placeNameHome} numberOfLines={3}>
                 {item.name}
               </Text>
               <Text style={{ fontSize: 14 }}>
-                Rating: {item.rating || "N/A"}
+                {item.rating ? `${item.rating}/5` : "N/A"}
               </Text>
               <View style={{ top: 10, flexDirection: "row" }}>
                 <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
@@ -184,7 +187,7 @@ export default function HomeScreen(props) {
                 />
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
       <View style={globalStyles.menuContainerHome}>
@@ -195,13 +198,13 @@ export default function HomeScreen(props) {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('WeatherScreen')}>
-        <Image
-          source={require("../assets/compass.png")}
-          style={{ width: 40, height: 40 }}
-        />
+        <TouchableOpacity onPress={() => navigation.navigate("WeatherScreen")}>
+          <Image
+            source={require("../assets/compass.png")}
+            style={{ width: 40, height: 40 }}
+          />
         </TouchableOpacity>
-        
+
         <TouchableOpacity>
           <Image
             source={require("../assets/heart.png")}
