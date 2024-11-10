@@ -90,7 +90,8 @@ const login = async (req, res) => {
                 req.session.userId = userFound.userId; // Set session identifier
                 res.status(200).json({
                     iduser: userFound.userId,
-                    email: userFound.email
+                    username: userFound.username,
+                    sessionId: req.sessionID //sending back the session id
                 })//return an object with these atributes
             }
             else{
@@ -105,13 +106,17 @@ const login = async (req, res) => {
     }
 }
 
-const home = async (req, res) => {
-    // this is only called when there is an authentication user due to isAuthenticated
-    res.json(`hello user ${req.session.userId}`);
+const logout = async (req, res) => {
+    try{
+        req.session.destroy();
+        return res.status(200).json({message: "Logout succesful"});
+    }catch(err){
+        res.status(500).json({error: err.message});
+    }
 }
 
 module.exports = {
     register,
     login,
-    home
+    logout
 };

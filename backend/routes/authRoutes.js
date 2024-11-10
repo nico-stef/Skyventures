@@ -12,6 +12,7 @@ const requireAuth = (req, res, next) => {
 
 router.route("/register").post(authControllers.register);
 router.route("/login").post(authControllers.login);
-router.get('/home', requireAuth, authControllers.home);
+router.route("/logout").get(authControllers.logout);
+//router.get('/home', requireAuth, authControllers.home);
 
 module.exports = router;
