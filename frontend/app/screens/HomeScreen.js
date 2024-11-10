@@ -1,24 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  StyleSheet,
   Text,
   SafeAreaView,
   Image,
-  Button,
   TouchableOpacity,
   Animated,
-  Keyboard,
   ScrollView,
+  FlatList,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import { SearchBar } from "@rneui/themed";
+import { Dropdown } from "react-native-element-dropdown";
+import * as Location from "expo-location";
+import {
+  getNearbyPlaces,
+  getPlacePhotoUrl,
+} from "../functions/googlePlacesFunction";
+import { globalStyles } from "../styles/globalStyles";
+
 export default function HomeScreen(props) {
   const navigation = useNavigation();
 
-  const [search, setSearch] = useState("");
+  const [placeType, setPlaceType] = useState(null); // Get placeType from route params
+  const [location, setLocation] = useState(null);
+  const [places, setPlaces] = useState([]);
+  const [errorMsg, setErrorMsg] = useState(null);
 
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      const location = await Location.getLastKnownPositionAsync(); // Use last known position
+      if (location) {
+        setLocation(location.coords);
+        fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
+      } else {
+        // Fall back to current position if last known is unavailable
+        const currentLocation = await Location.getCurrentPositionAsync();
+        setLocation(currentLocation.coords);
+        fetchNearbyPlaces(
+          currentLocation.coords.latitude,
+          currentLocation.coords.longitude
+        );
+      }
+    };
+
+    fetchLocation();
+  }, [placeType]);
+
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  const fetchNearbyPlaces = async (latitude, longitude) => {
+    setLoading(true); // Start loading
+    try {
+      const data = await getNearbyPlaces(latitude, longitude, placeType);
+      setPlaces(data.results.slice(0, 10));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const [search, setSearch] = useState("");
+  const data = [
+    { label: "Restaurants", value: "restaurant" },
+    { label: "Hotels", value: "lodging" },
+    { label: "Cafes", value: "cafe" },
+    { label: "Parks", value: "park" },
+    { label: "Museums", value: "museum" },
+    { label: "Gyms", value: "gym" },
+    { label: "Hospitals", value: "hospital" },
+    { label: "Shops", value: "store" },
+  ];
+  const handlePlaceTypeSelection = (item) => {
+    setValue(item.value); // update selected value
+    // Navigate to NearbyPlaces with the selected place type
+    setPlaceType(item.value);
+  };
+
+  const [value, setValue] = useState(null);
   const updateSearch = (search) => {
     setSearch(search);
   };
@@ -34,17 +99,17 @@ export default function HomeScreen(props) {
 
   const loadingProgress = this.loadingState.loadingProgress;
 
+  const [showSuggestions, setShowSuggestions] = useState(false); // Control visibility of suggestions
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current?.setAddressText("");
+  }, []);
+
   return (
-    <SafeAreaView style={styles.background}>
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          justifyContent: "space-around",
-          flex: 0.15,
-        }}
-      >
-        <View style={styles.welcomeContainer}>
+    <SafeAreaView style={globalStyles.backgroundHome}>
+      <View style={globalStyles.userContainerHome}>
+        <View style={globalStyles.welcomeContainerHome}>
           <Text style={{ fontSize: 22, color: "#000" }}>Hello, User</Text>
           <Text style={{ fontSize: 16, color: "#888" }}>
             Welcome to Skyventures
@@ -61,86 +126,86 @@ export default function HomeScreen(props) {
         </TouchableOpacity>
       </View>
 
-      <SearchBar
-        placeholder="Type Here..."
-        onChangeText={updateSearch}
-        lightTheme={true}
-        value={search}
-        placeholderTextColor={"#000"}
-        round={true}
-        containerStyle={styles.searchBarContainer}
-        inputContainerStyle={{ backgroundColor: "#f5f1f8" }}
-        inputStyle={{ color: "#000" }}
-      />
-
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: "bold",
-          paddingVertical: 10,
-          paddingLeft: 10,
-        }}
-      >
+      <Text style={globalStyles.selectYourTripTextHome}>
         Select your next trip
       </Text>
-      <ScrollView
-        style={styles.scrollableContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.cardContainer}>
-          <Image
-            source={require("../assets/icon.png")}
-            style={{
-              width: "50%",
-              height: "100%",
-              resizeMode: "cover",
-              borderRadius: 20,
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              paddingLeft: 10,
-            }}
-          >
-            <Text style={{ bottom: 20, fontSize: 16, fontWeight: "bold" }}>
-              Titlu la locatie mai lung sa vedem ce se intampla
-            </Text>
-            <Text style={{ fontSize: 14 }}>rating 4/5</Text>
-            <View style={{ top: 10, flexDirection: "row" }}>
-              <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
-                Tap to see more
-              </Text>
+      <View style={globalStyles.autocompleteContainerHome}>
+        <Dropdown
+          style={globalStyles.dropdownHome}
+          placeholderStyle={globalStyles.placeholderStyleHome}
+          selectedTextStyle={globalStyles.selectedTextStyleHome}
+          inputSearchStyle={globalStyles.inputSearchStyleHome}
+          iconStyle={globalStyles.iconStyleHome}
+          data={data}
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder="Select item"
+          searchPlaceholder="Search..."
+          value={value}
+          onChange={handlePlaceTypeSelection}
+        />
+      </View>
+      <FlatList
+        style={globalStyles.scrollableContainerHome}
+        data={places}
+        keyExtractor={(item) => item.place_id}
+        renderItem={({ item }) => (
+          <View style={globalStyles.cardContainerHome}>
+            {item.photos && item.photos.length > 0 ? (
               <Image
-                source={require("../assets/right-arrow.png")}
-                style={{
-                  width: 24,
-                  height: 24,
+                source={{
+                  uri: getPlacePhotoUrl(
+                    item.photos[0].photo_reference,
+                    400,
+                    400
+                  ),
                 }}
+                style={globalStyles.placeToVisitImageContainerHome}
               />
+            ) : (
+              <View style={globalStyles.placeToVisitWithoutImageContainerHome}>
+                <Text>No Image</Text>
+              </View>
+            )}
+            <View style={globalStyles.cardContent}>
+              <Text style={globalStyles.placeName} numberOfLines={3}>
+                {item.name}
+              </Text>
+              <Text style={{ fontSize: 14 }}>
+                Rating: {item.rating || "N/A"}
+              </Text>
+              <View style={{ top: 10, flexDirection: "row" }}>
+                <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
+                  Tap to see more
+                </Text>
+                <Image
+                  source={require("../assets/right-arrow.png")}
+                  style={{
+                    width: 24,
+                    height: 24,
+                  }}
+                />
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styles.cardContainer} />
-        <View style={styles.cardContainer} />
-        <View style={styles.cardContainer} />
-        <View style={styles.cardContainer} />
-      </ScrollView>
-      <View style={styles.menuContainer}>
+        )}
+      />
+      <View style={globalStyles.menuContainerHome}>
         <TouchableOpacity>
           <Image
             source={require("../assets/home.png")}
             style={{ width: 40, height: 40 }}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Image
-            source={require("../assets/compass.png")}
-            style={{ width: 40, height: 40 }}
-          />
+
+        <TouchableOpacity onPress={() => navigation.navigate('WeatherScreen')}>
+        <Image
+          source={require("../assets/compass.png")}
+          style={{ width: 40, height: 40 }}
+        />
         </TouchableOpacity>
+        
         <TouchableOpacity>
           <Image
             source={require("../assets/heart.png")}
@@ -151,55 +216,3 @@ export default function HomeScreen(props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  cardContainer: {
-    height: 150,
-    width: "100%",
-    backgroundColor: "red",
-    marginTop: 10,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "black",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  scrollableContainer: {
-    flex: 1.5,
-    alignSelf: "center",
-    width: "90%",
-    alignContent: "center",
-    marginBottom: 15,
-  },
-  searchBarContainer: {
-    backgroundColor: "#fff",
-  },
-  menuContainer: {
-    flex: 0.2,
-    width: "80%",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    padding: 5,
-    alignSelf: "center",
-    backgroundColor: "pink",
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "black",
-  },
-  welcomeContainer: {
-    flex: 1,
-    width: "100%",
-    padding: 10,
-  },
-});
