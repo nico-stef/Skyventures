@@ -28,3 +28,18 @@ export const getPlacePhotoUrl = (
 ) => {
   return `${BASE_URL}/photo?maxwidth=${maxWidth}&maxheight=${maxHeight}&photoreference=${photoReference}&key=${API_KEY}`;
 };
+
+export const getPlaceDetails = async (placeId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/details/json`, {
+      params: {
+        place_id: placeId,
+        key: API_KEY,
+      },
+    });
+    return response.data.result; // Returns the 'result' object with detailed information
+  } catch (error) {
+    console.error("Error fetching place details:", error);
+    throw error;
+  }
+};
