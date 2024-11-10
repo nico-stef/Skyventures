@@ -37,7 +37,7 @@ const WeatherScreen = () => {
         };
 
         fetchWeather();
-    }, [location]); // Run this effect when location changes
+    }, [location]); // run this effect when location changes
 
     return (
         <View style={{

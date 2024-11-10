@@ -1,6 +1,5 @@
 // GooglePlacesService.js
 import axios from "axios";
-import { PLACES_API_KEY } from "@env";
 
 const API_KEY = ""; // Replace with your API Key
 const BASE_URL = "https://maps.googleapis.com/maps/api/place";
