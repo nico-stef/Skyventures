@@ -173,7 +173,7 @@ export default function HomeScreen(props) {
                 {item.name}
               </Text>
               <Text style={{ fontSize: 14 }}>
-                Rating: {item.rating || "N/A"}
+                Rating: {item.rating || "N/A"}/5
               </Text>
               <View style={{ top: 10, flexDirection: "row" }}>
                 <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
@@ -199,13 +199,13 @@ export default function HomeScreen(props) {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('WeatherScreen')}>
-        <Image
-          source={require("../assets/compass.png")}
-          style={{ width: 40, height: 40 }}
-        />
+        <TouchableOpacity onPress={() => navigation.navigate("WeatherScreen")}>
+          <Image
+            source={require("../assets/compass.png")}
+            style={{ width: 40, height: 40 }}
+          />
         </TouchableOpacity>
-        
+
         <TouchableOpacity>
           <Image
             source={require("../assets/heart.png")}
