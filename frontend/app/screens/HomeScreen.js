@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   Animated,
-  ScrollView,
   FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -91,20 +90,6 @@ export default function HomeScreen(props) {
     loadingProgress: new Animated.Value(0),
   };
 
-  Animated.timing(this.loadingState.loadingProgress, {
-    toValue: 100,
-    duration: 700,
-    useNativeDriver: true,
-  }).start();
-
-  const loadingProgress = this.loadingState.loadingProgress;
-
-  const [showSuggestions, setShowSuggestions] = useState(false); // Control visibility of suggestions
-  const ref = useRef();
-
-  useEffect(() => {
-    ref.current?.setAddressText("");
-  }, []);
 
   return (
     <SafeAreaView style={globalStyles.backgroundHome}>
