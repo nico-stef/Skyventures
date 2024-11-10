@@ -16,6 +16,8 @@ import {
   getPlacePhotoUrl,
 } from "../functions/googlePlacesFunction";
 import { globalStyles } from "../styles/globalStyles";
+import * as SecureStore from 'expo-secure-store';
+import { logout } from "../functions/authFunctions";
 
 export default function HomeScreen(props) {
   const navigation = useNavigation();
@@ -24,6 +26,7 @@ export default function HomeScreen(props) {
   const [location, setLocation] = useState(null);
   const [places, setPlaces] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -50,6 +53,14 @@ export default function HomeScreen(props) {
 
     fetchLocation();
   }, [placeType]);
+
+  useEffect(() => {
+    const getUsername = async () => {
+      const username = await SecureStore.getItemAsync('username');
+      setUsername(username);
+    }
+    getUsername();
+  }, [])
 
   const [loading, setLoading] = useState(true); // Add loading state
 
@@ -94,15 +105,15 @@ export default function HomeScreen(props) {
   return (
     <SafeAreaView style={globalStyles.backgroundHome}>
       <View style={globalStyles.userContainerHome}>
-        <View style={globalStyles.welcomeContainerHome}>
-          <Text style={{ fontSize: 22, color: "#000" }}>Hello, User</Text>
+        <View style={[globalStyles.welcomeContainerHome, {paddingTop: 30}]}>
+          <Text style={{ fontSize: 22, color: "#000" }}>Hello, {username}</Text>
           <Text style={{ fontSize: 16, color: "#888" }}>
             Welcome to Skyventures
           </Text>
         </View>
         <TouchableOpacity
           style={{ flex: 0.2, top: 15 }}
-          onPress={() => navigation.navigate("Start")}
+          onPress={() => logout(navigation)}
         >
           <Image
             source={require("../assets/exit.png")}

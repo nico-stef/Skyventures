@@ -16,6 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import { login } from "../functions/authFunctions";
 import { globalStyles } from "../styles/globalStyles";
 import { Alert } from "react-native";
+import * as SecureStore from 'expo-secure-store';
 
 var animationDoneLogin = false;
 
@@ -78,6 +79,8 @@ export default function LoginScreen(props) {
       if (result.error) {
         Alert.alert("Login Failed", result.error);
       } else {
+        await SecureStore.setItemAsync('sessionId', result.sessionId);
+        await SecureStore.setItemAsync('username', result.username);
         navigation.navigate("Home");
       }
     } catch (error) {

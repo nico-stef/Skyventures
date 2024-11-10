@@ -27,9 +27,9 @@ const WeatherScreen = () => {
     const placeTypeMapping = {
         'Rain': ['restaurant', 'cafe', 'museum', 'theater'],
         'Snow': ['restaurant', 'cafe', 'museum', 'cinema'],
-        'Clear': ['park', 'beach', 'hiking', 'outdoor market'],
+        'Clear': ['park', 'beach', 'hiking'],
         'Cloudy': ['mall', 'art gallery', 'cinema'],
-        'Sunny': ['park', 'zoo', 'outdoor market'],
+        'Sunny': ['park', 'zoo'],
         'Overcast': ['mall', 'restaurant', 'cafe']
     };
 
@@ -106,7 +106,10 @@ const WeatherScreen = () => {
 
                     const allPlaces = recommendations
                         .map(response => response.results)  //array cu array-uri pt fiecare tip de locatie
-                        .flat(); //sparge array-ul de tipuri de locatii si raman doar locatiile
+                        .flat() //sparge array-ul de tipuri de locatii si raman doar locatiile
+                        .filter((place, index, self) => //ex: parcuri se incadreaza si la parc si la outdoor marekt si
+                            index === self.findIndex(p => p.place_id === place.place_id)//erau duplicate
+                        )
 
                     setPlaces(allPlaces);
                 } catch (error) {

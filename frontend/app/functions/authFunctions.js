@@ -1,4 +1,5 @@
 const API_URL = "http://192.168.0.100:3000";
+import * as SecureStore from 'expo-secure-store';
 
 export const login = async (email, password) => {
   try {
@@ -48,3 +49,25 @@ export const register = async (username, email, password) => {
     throw error;
   }
 };
+
+export const logout = async (navigation) => {
+  try {
+    const response = await fetch(`${API_URL}/logout`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      await SecureStore.deleteItemAsync('sessionId');
+      await SecureStore.deleteItemAsync('username');
+      navigation.navigate('Start');
+    }
+  } catch (err) {
+    console.error("Logout error:", err);
+    throw err;
+  }
+}
