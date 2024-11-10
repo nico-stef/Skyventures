@@ -6,6 +6,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import RegisterScreen from "./app/screens/RegisterScreen";
 import HomeScreen from "./app/screens/HomeScreen";
+import CustomPlacesSearch from "./app/screens/NearbyPlaces";
 import "react-native-get-random-values";
 import NearbyPlaces from "./app/screens/NearbyPlaces";
 import WeatherScreen from "./app/screens/WeatherScreen";
