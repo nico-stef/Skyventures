@@ -8,6 +8,7 @@ import RegisterScreen from "./app/screens/RegisterScreen";
 import HomeScreen from "./app/screens/HomeScreen";
 import "react-native-get-random-values";
 import WeatherScreen from "./app/screens/WeatherScreen";
+import PlaceScreen from "./app/screens/PlaceScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
+        <Stack.Screen name="PlaceScreen" component={PlaceScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

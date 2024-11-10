@@ -36,3 +36,5 @@ yarn-error.*
 
 # todo
 todo.txt
+
+.env
