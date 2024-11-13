@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Animated,
   FlatList,
 } from "react-native";
@@ -16,7 +17,7 @@ import {
   getPlacePhotoUrl,
 } from "../functions/googlePlacesFunction";
 import { globalStyles } from "../styles/globalStyles";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import { logout } from "../functions/authFunctions";
 
 export default function HomeScreen(props) {
@@ -26,7 +27,7 @@ export default function HomeScreen(props) {
   const [location, setLocation] = useState(null);
   const [places, setPlaces] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -56,11 +57,11 @@ export default function HomeScreen(props) {
 
   useEffect(() => {
     const getUsername = async () => {
-      const username = await SecureStore.getItemAsync('username');
+      const username = await SecureStore.getItemAsync("username");
       setUsername(username);
-    }
+    };
     getUsername();
-  }, [])
+  }, []);
 
   const [loading, setLoading] = useState(true); // Add loading state
 
@@ -101,10 +102,20 @@ export default function HomeScreen(props) {
     loadingProgress: new Animated.Value(0),
   };
 
+  const [favorites, setFavorites] = useState({});
+
+  // Function to toggle favorite status for each item
+  const handleAddFavorites = (placeId) => {
+    setFavorites((prevFavorites) => ({
+      ...prevFavorites,
+      [placeId]: !prevFavorites[placeId], // Toggle the favorite status
+    }));
+  };
+
   return (
     <SafeAreaView style={globalStyles.backgroundHome}>
       <View style={globalStyles.userContainerHome}>
-        <View style={[globalStyles.welcomeContainerHome, {paddingTop: 30}]}>
+        <View style={[globalStyles.welcomeContainerHome, { paddingTop: 30 }]}>
           <Text style={{ fontSize: 22, color: "#000" }}>Hello, {username}</Text>
           <Text style={{ fontSize: 16, color: "#888" }}>
             Welcome to Skyventures
@@ -147,34 +158,80 @@ export default function HomeScreen(props) {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.place_id}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={globalStyles.cardContainerHome}
-            onPress={() => navigation.navigate("PlaceScreen", { place: item })}
-          >
+          <View style={globalStyles.cardContainerHome}>
             {item.photos && item.photos.length > 0 ? (
-              <Image
-                source={{
-                  uri: getPlacePhotoUrl(
-                    item.photos[0].photo_reference,
-                    400,
-                    400
-                  ),
-                }}
-                style={globalStyles.placeToVisitImageContainerHome}
-              />
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  navigation.navigate("PlaceScreen", { place: item })
+                }
+              >
+                <Image
+                  source={{
+                    uri: getPlacePhotoUrl(
+                      item.photos[0].photo_reference,
+                      400,
+                      400
+                    ),
+                  }}
+                  style={globalStyles.placeToVisitImageContainerHome}
+                />
+              </TouchableWithoutFeedback>
             ) : (
-              <View style={globalStyles.placeToVisitWithoutImageContainerHome}>
-                <Text>No Image</Text>
-              </View>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("PlaceScreen", { place: item })
+                }
+              >
+                <View
+                  style={globalStyles.placeToVisitWithoutImageContainerHome}
+                >
+                  <Text>No Image</Text>
+                </View>
+              </TouchableOpacity>
             )}
             <View style={globalStyles.cardContent}>
-              <Text style={globalStyles.placeNameHome} numberOfLines={3}>
-                {item.name}
-              </Text>
-              <Text style={{ fontSize: 14 }}>
-                {item.rating ? `${item.rating}/5` : "N/A"}
-              </Text>
-              <View style={{ top: 10, flexDirection: "row" }}>
+              <TouchableOpacity
+                onPress={() => handleAddFavorites(item.place_id)}
+              >
+                <Image
+                  source={require("../assets/heart.png")}
+                  style={{
+                    position: "static",
+                    left: 115,
+                    bottom: "25%",
+                    tintColor: favorites[item.place_id] ? "red" : "black",
+                    width: 40,
+                    height: 40,
+                  }}
+                />
+              </TouchableOpacity>
+
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  navigation.navigate("PlaceScreen", { place: item })
+                }
+              >
+                <Text style={globalStyles.placeNameHome} numberOfLines={3}>
+                  {item.name}
+                </Text>
+              </TouchableWithoutFeedback>
+
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  navigation.navigate("PlaceScreen", { place: item })
+                }
+              >
+                <Text style={{ fontSize: 14 }}>
+                  {item.rating ? `${item.rating}/5` : "N/A"}
+                </Text>
+              </TouchableWithoutFeedback>
+
+              <TouchableOpacity
+                style={{ top: 10, flexDirection: "row" }}
+                onPress={() =>
+                  navigation.navigate("PlaceScreen", { place: item })
+                }
+              >
                 <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
                   Tap to see more
                 </Text>
@@ -185,9 +242,9 @@ export default function HomeScreen(props) {
                     height: 24,
                   }}
                 />
-              </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
         )}
       />
       <View style={globalStyles.menuContainerHome}>
