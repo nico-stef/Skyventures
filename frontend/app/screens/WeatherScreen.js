@@ -19,19 +19,19 @@ import {
 const WeatherScreen = () => {
   const navigation = useNavigation();
 
-    const [location, setLocation] = useState(null);
-    const [errorMsg, setErrorMsg] = useState(null);
-    const [weatherData, setWeatherData] = useState(null);
-    const [loading, setLoading] = useState(true); // Add loading state
-    const [places, setPlaces] = useState([]);
-    const placeTypeMapping = {
-        'Rain': ['restaurant', 'cafe', 'museum', 'theater'],
-        'Snow': ['restaurant', 'cafe', 'museum', 'cinema'],
-        'Clear': ['park', 'beach', 'hiking'],
-        'Cloudy': ['mall', 'art gallery', 'cinema'],
-        'Sunny': ['park', 'zoo'],
-        'Overcast': ['mall', 'restaurant', 'cafe']
-    };
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [places, setPlaces] = useState([]);
+  const placeTypeMapping = {
+    Rain: ["restaurant", "cafe", "museum", "theater"],
+    Snow: ["restaurant", "cafe", "museum", "cinema"],
+    Clear: ["park", "beach", "hiking"],
+    Cloudy: ["mall", "art gallery", "cinema"],
+    Sunny: ["park", "zoo"],
+    Overcast: ["mall", "restaurant", "cafe"],
+  };
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -110,12 +110,17 @@ const WeatherScreen = () => {
             )
           );
 
-                    const allPlaces = recommendations
-                        .map(response => response.results)  //array cu array-uri pt fiecare tip de locatie
-                        .flat() //sparge array-ul de tipuri de locatii si raman doar locatiile
-                        .filter((place, index, self) => //ex: parcuri se incadreaza si la parc si la outdoor marekt si
-                            index === self.findIndex(p => p.place_id === place.place_id)//erau duplicate
-                        )
+          const allPlaces = recommendations
+            .map((response) => response.results) //array cu array-uri pt fiecare tip de locatie
+            .flat() //sparge array-ul de tipuri de locatii si raman doar locatiile
+            .filter(
+              (
+                place,
+                index,
+                self //ex: parcuri se incadreaza si la parc si la outdoor marekt si
+              ) =>
+                index === self.findIndex((p) => p.place_id === place.place_id) //erau duplicate
+            );
 
           setPlaces(allPlaces);
         } catch (error) {
@@ -144,7 +149,10 @@ const WeatherScreen = () => {
         data={places}
         keyExtractor={(item) => item.place_id}
         renderItem={({ item }) => (
-          <View style={globalStyles.cardContainerHome}>
+          <TouchableOpacity
+            style={globalStyles.cardContainerHome}
+            onPress={() => navigation.navigate("PlaceScreen", { place: item })}
+          >
             {item.photos && item.photos.length > 0 ? (
               <Image
                 source={{
@@ -162,6 +170,17 @@ const WeatherScreen = () => {
               </View>
             )}
             <View style={globalStyles.cardContent}>
+              <Image
+                source={require("../assets/heart.png")}
+                style={{
+                  position: "absolute",
+                  left: "85%",
+                  bottom: "45%",
+                  tintColor: "red",
+                  width: 30,
+                  height: 30,
+                }}
+              />
               <Text style={globalStyles.placeNameHome} numberOfLines={3}>
                 {item.name}
               </Text>
@@ -181,7 +200,7 @@ const WeatherScreen = () => {
                 />
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
       <View style={globalStyles.menuContainerHome}>

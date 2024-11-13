@@ -295,10 +295,9 @@ export const globalStyles = StyleSheet.create({
   },
   placeNameHome: {
     bottom: 20,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
-    flexWrap: "wrap",
-    maxWidth: "70%",
+    maxWidth: "60%",
   },
   weatherConditionWeather: {
     width: "90%",
