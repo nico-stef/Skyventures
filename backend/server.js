@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const session = require("express-session");
+const {favoritesSchemaCheck} = require('./schemas/favoritesSchema');
 
 app.use(cors());
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use(session({
 }));
 
 app.use("/", require("./routes/authRoutes"));
+app.use("/favorites", require("./routes/favoritesRoutes"));
 
 // Global Error Handler Middleware function
 app.use((err, req, res, next) => {
@@ -29,4 +31,6 @@ app.use((err, req, res, next) => {
 
 // Listen on pc port
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
+favoritesSchemaCheck().then(() => {
+  app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
+});
