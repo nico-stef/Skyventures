@@ -19,6 +19,7 @@ import {
 import { globalStyles } from "../styles/globalStyles";
 import * as SecureStore from "expo-secure-store";
 import { logout } from "../functions/authFunctions";
+import axios from "axios";
 
 export default function HomeScreen(props) {
   const navigation = useNavigation();
@@ -28,6 +29,7 @@ export default function HomeScreen(props) {
   const [places, setPlaces] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -56,11 +58,13 @@ export default function HomeScreen(props) {
   }, [placeType]);
 
   useEffect(() => {
-    const getUsername = async () => {
+    const getUserData = async () => {
       const username = await SecureStore.getItemAsync("username");
       setUsername(username);
+      const userId = await SecureStore.getItemAsync("userId");
+      setUserId(userId);
     };
-    getUsername();
+    getUserData();
   }, []);
 
   const [loading, setLoading] = useState(true); // Add loading state
@@ -102,20 +106,61 @@ export default function HomeScreen(props) {
     loadingProgress: new Animated.Value(0),
   };
 
-  const [favorites, setFavorites] = useState({});
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (userId) {
+        try {
+          // Fetch the user's favorites from the backend
+          const response = await axios.get(
+            `http://192.168.0.103:3000/favorites/${userId}`
+          );
+          const favoritePlaces = response.data.map((fav) => fav.placeId); // Get an array of placeIds
+          setFavorites(favoritePlaces); // Set the favorites state
+        } catch (err) {
+          console.log("Error fetching favorites: ", err);
+        }
+      }
+    };
+
+    fetchFavorites();
+  }, [userId]);
 
   // Function to toggle favorite status for each item
   const handleAddFavorites = (placeId) => {
-    setFavorites((prevFavorites) => ({
-      ...prevFavorites,
-      [placeId]: !prevFavorites[placeId], // Toggle the favorite status
-    }));
+    setFavorites((prevFavorites) => {
+      const isFavorite = prevFavorites.includes(placeId); // Check if the place is already a favorite
+      if (isFavorite) {
+        // If it's already a favorite, remove it from the array
+        return prevFavorites.filter((id) => id !== placeId);
+      } else {
+        // If it's not a favorite, add it to the array
+        return [...prevFavorites, placeId];
+      }
+    });
+
+    const data = {
+      userId: userId,
+      placeId: placeId,
+    };
+
+    console.log(userId, placeId);
+
+    axios
+      .post("http://192.168.0.103:3000/favorites/add", data)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error sending data: ", error);
+      });
   };
 
   return (
     <SafeAreaView style={globalStyles.backgroundHome}>
       <View style={globalStyles.userContainerHome}>
-        <View style={[globalStyles.welcomeContainerHome, { paddingTop: 30 }]}>
+        <View style={[globalStyles.welcomeContainerHome, { paddingTop: 10 }]}>
           <Text style={{ fontSize: 22, color: "#000" }}>Hello, {username}</Text>
           <Text style={{ fontSize: 16, color: "#888" }}>
             Welcome to Skyventures
@@ -178,15 +223,12 @@ export default function HomeScreen(props) {
               </TouchableWithoutFeedback>
             ) : (
               <TouchableOpacity
+                style={globalStyles.placeToVisitWithoutImageContainerHome}
                 onPress={() =>
                   navigation.navigate("PlaceScreen", { place: item })
                 }
               >
-                <View
-                  style={globalStyles.placeToVisitWithoutImageContainerHome}
-                >
-                  <Text>No Image</Text>
-                </View>
+                <Text>No Image</Text>
               </TouchableOpacity>
             )}
             <View style={globalStyles.cardContent}>
@@ -197,9 +239,11 @@ export default function HomeScreen(props) {
                   source={require("../assets/heart.png")}
                   style={{
                     position: "static",
-                    left: 115,
-                    bottom: "25%",
-                    tintColor: favorites[item.place_id] ? "red" : "black",
+                    left: 100,
+                    bottom: "10%",
+                    tintColor: favorites.includes(item.place_id)
+                      ? "red"
+                      : "black",
                     width: 40,
                     height: 40,
                   }}
@@ -262,7 +306,9 @@ export default function HomeScreen(props) {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("FavoritesScreen")}
+        >
           <Image
             source={require("../assets/heart.png")}
             style={{ width: 40, height: 40 }}

@@ -9,6 +9,7 @@ import HomeScreen from "./app/screens/HomeScreen";
 import "react-native-get-random-values";
 import WeatherScreen from "./app/screens/WeatherScreen";
 import PlaceScreen from "./app/screens/PlaceScreen";
+import FavoritesScreen from "./app/screens/FavoritesScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
         <Stack.Screen name="PlaceScreen" component={PlaceScreen} />
+        <Stack.Screen name="FavoritesScreen" component={FavoritesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

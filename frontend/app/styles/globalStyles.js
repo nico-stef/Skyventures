@@ -178,6 +178,7 @@ export const globalStyles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     backgroundColor: "#fff",
+    paddingTop: 20,
   },
   cardContainerHome: {
     height: 150,
@@ -207,8 +208,8 @@ export const globalStyles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
-
     elevation: 2,
+    bottom: 45,
   },
   scrollableContainerHome: {
     flex: 1.5,
@@ -287,9 +288,9 @@ export const globalStyles = StyleSheet.create({
   placeToVisitWithoutImageContainerHome: {
     width: "50%",
     height: "100%",
-    resizeMode: "cover",
     borderRadius: 16,
     marginRight: 10,
+    fontSize: 20,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -314,7 +315,7 @@ export const globalStyles = StyleSheet.create({
     paddingLeft: 5,
     paddingBottom: 7,
   },
-  backgroundPlace: { flex: 1 },
+  backgroundPlace: { flex: 1, paddingTop: 30 },
   placeContainerPlace: { flex: 1, paddingHorizontal: 16, paddingVertical: 5 },
   imagePlace: {
     width: "100%",

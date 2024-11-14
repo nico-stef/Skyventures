@@ -43,3 +43,53 @@ export const getPlaceDetails = async (placeId) => {
     throw error;
   }
 };
+
+export const getFavoritePlacesDetails = async (placeIds) => {
+  try {
+    const placeDetailsPromises = placeIds.map(async (placeId) => {
+      try {
+        const details = await getPlaceDetails(placeId);
+
+        // Check if details exist and handle missing properties gracefully
+        if (details) {
+          const photoUrl = details.photos?.length
+            ? getPlacePhotoUrl(details.photos[0].photo_reference, 400, 400)
+            : null;
+
+          return {
+            id: placeId,
+            name: details.name || "Unknown Place",
+            address: details.formatted_address || "No address available",
+            rating: details.rating || "No rating",
+            photoUrl: photoUrl,
+          };
+        } else {
+          // If details is undefined, return a fallback object
+          return {
+            id: placeId,
+            name: "Unknown Place",
+            address: "No address available",
+            rating: null,
+            photoUrl: null,
+          };
+        }
+      } catch (error) {
+        console.error(`Error fetching details for place ID ${placeId}:`, error);
+        return {
+          id: placeId,
+          name: "Unknown Place",
+          address: "No address available",
+          rating: null,
+          photoUrl: null,
+        };
+      }
+    });
+
+    // Wait for all place details promises to resolve
+    const placesDetails = await Promise.all(placeDetailsPromises);
+    return placesDetails;
+  } catch (error) {
+    console.error("Error fetching favorite places details:", error);
+    throw error;
+  }
+};
