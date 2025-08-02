@@ -1,8 +1,8 @@
-## 📱 Descriere
+## Descriere
 
 **Skyventures** este o aplicație mobilă dezvoltată în echipă de 2 persoane, care oferă utilizatorilor recomandări personalizate de puncte de interes pe baza **locației curente** și a **condițiilor meteo**.
 
-## 🌟 Funcționalități principale
+## Funcționalități principale
 
 ### 1. Recomandări bazate pe locație
 - Bazat pe locația utilizatorului, aplicația oferă o listă cu puncte de interes din apropiere (restaurante, parcuri, teatre, etc).
@@ -13,7 +13,7 @@
 ### 3. Pagina de favorite
 - utilizatorul poate salva punctele de interes într-o listă de favorite.
 
-## 🛠️ Tehnologii utilizate
+## Tehnologii utilizate
 
 - **Frontend:** React Native
 - **Backend:** Node.js
