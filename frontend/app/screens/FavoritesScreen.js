@@ -36,7 +36,7 @@ const FavoritesScreen = () => {
         try {
           // Fetch the user's favorites from the backend
           const response = await axios.get(
-            `http://192.168.0.103:3000/favorites/${userId}`
+            `http://192.168.1.4:3000/favorites/${userId}`
           );
           const favoritePlaceIds = response.data.map((fav) => fav.placeId); // Get an array of placeIds
           const favoritePlacesDetails = await getFavoritePlacesDetails(

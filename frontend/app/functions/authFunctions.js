@@ -1,4 +1,4 @@
-const API_URL = "http://10.20.1.246:3000";
+const API_URL = "http://192.168.1.4:3000";
 import * as SecureStore from "expo-secure-store";
 
 export const login = async (email, password) => {

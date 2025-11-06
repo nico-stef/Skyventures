@@ -3,16 +3,17 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const session = require("express-session");
-const {favoritesSchemaCheck} = require('./schemas/favoritesSchema');
+const { favoritesSchemaCheck } = require('./schemas/favoritesSchema');
+const { userSchemaCheck } = require('./schemas/userSchema');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(session({
-    secret: 'secret-session',
-    resave: false,
-    saveUninitialized: false
+  secret: 'secret-session',
+  resave: false,
+  saveUninitialized: false
 }));
 
 app.use("/", require("./routes/authRoutes"));
@@ -31,6 +32,14 @@ app.use((err, req, res, next) => {
 
 // Listen on pc port
 const PORT = process.env.PORT || 3000;
-favoritesSchemaCheck().then(() => {
-  app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
-});
+Promise.all([
+  favoritesSchemaCheck(),
+  userSchemaCheck()
+])
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
+  })
+  .catch(err => {
+    console.error("Eroare la inițializarea schemelor bazei de date:", err);
+    process.exit(1);
+  });

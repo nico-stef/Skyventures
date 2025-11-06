@@ -114,7 +114,7 @@ export default function HomeScreen(props) {
         try {
           // Fetch the user's favorites from the backend
           const response = await axios.get(
-            `http://192.168.0.103:3000/favorites/${userId}`
+            `http://192.168.1.4:3000/favorites/${userId}`
           );
           const favoritePlaces = response.data.map((fav) => fav.placeId); // Get an array of placeIds
           setFavorites(favoritePlaces); // Set the favorites state
@@ -148,7 +148,7 @@ export default function HomeScreen(props) {
     console.log(userId, placeId);
 
     axios
-      .post("http://192.168.0.103:3000/favorites/add", data)
+      .post("http://192.168.1.4:3000/favorites/add", data)
       .then((response) => {
         console.log(response.data);
       })

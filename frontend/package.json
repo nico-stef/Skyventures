@@ -16,6 +16,7 @@
     "@rneui/themed": "github:react-native-elements/react-native-elements#themed",
     "@types/react-native-elements": "^0.16.4",
     "axios": "^1.7.7",
+    "dotenv": "^17.2.3",
     "expo": "^51.0.0",
     "expo-linear-gradient": "~13.0.2",
     "expo-location": "~17.0.1",

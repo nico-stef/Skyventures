@@ -1,8 +1,7 @@
 const { v4: uuid } = require("uuid"); //import v4 method and rename to uuid
 const bcrypt = require("bcryptjs");
 const pool = require('../config/db')
-const {userSchema} = require('../schemas/userSchema');
-require("dotenv").config(); 
+require("dotenv").config();
 const saltRounds = 10;
 
 
@@ -14,12 +13,10 @@ const register = async (req, res) => {
         return;
     }
 
-    await pool.execute(userSchema);
-
     //check if user with the same email or username already exists
     let [result] = await pool.query(`SELECT * FROM users WHERE email = ? OR username = ?`, [email, username]);
     if (result.length > 0) {
-        if(result[0].email === email)
+        if (result[0].email === email)
             res.status(500).json({ message: "There is already a user created with this email" });
         else
             res.status(500).json({ message: "There is already a user created with this username" });
@@ -47,7 +44,7 @@ const register = async (req, res) => {
 
             pool.query(
                 "INSERT INTO users (userId, email, username, password) VALUES (?, ?, ?, ?)",
-                [user.userId, user.email, user.username,  user.password]
+                [user.userId, user.email, user.username, user.password]
             )
                 .then(() => {
                     res.status(201).json({ message: "User created successfully!" });
@@ -94,11 +91,11 @@ const login = async (req, res) => {
                     sessionId: req.sessionID //sending back the session id
                 })//return an object with these atributes
             }
-            else{
-                res.status(401).json({ message: "Incorrect password!"});//returns an object with property message
+            else {
+                res.status(401).json({ message: "Incorrect password!" });//returns an object with property message
             }
         }
-        else{
+        else {
             res.status(404).json({ message: "User doesn't exist" });
         }
     } catch (err) {
@@ -107,11 +104,11 @@ const login = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-    try{
+    try {
         req.session.destroy();
-        return res.status(200).json({message: "Logout succesful"});
-    }catch(err){
-        res.status(500).json({error: err.message});
+        return res.status(200).json({ message: "Logout succesful" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 }
 
