@@ -20,6 +20,9 @@ import { globalStyles } from "../styles/globalStyles";
 import * as SecureStore from "expo-secure-store";
 import { logout } from "../functions/authFunctions";
 import axios from "axios";
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig.extra.API_URL;
 
 export default function HomeScreen(props) {
   const navigation = useNavigation();
@@ -114,7 +117,7 @@ export default function HomeScreen(props) {
         try {
           // Fetch the user's favorites from the backend
           const response = await axios.get(
-            `http://192.168.1.4:3000/favorites/${userId}`
+            `${API_URL}/favorites/${userId}`
           );
           const favoritePlaces = response.data.map((fav) => fav.placeId); // Get an array of placeIds
           setFavorites(favoritePlaces); // Set the favorites state
@@ -147,8 +150,7 @@ export default function HomeScreen(props) {
 
     console.log(userId, placeId);
 
-    axios
-      .post("http://192.168.1.4:3000/favorites/add", data)
+    axios.post(`${API_URL}/favorites/add`, data)
       .then((response) => {
         console.log(response.data);
       })

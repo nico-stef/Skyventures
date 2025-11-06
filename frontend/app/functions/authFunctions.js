@@ -1,5 +1,7 @@
-const API_URL = "http://192.168.1.4:3000";
 import * as SecureStore from "expo-secure-store";
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig.extra.API_URL;
 
 export const login = async (email, password) => {
   try {

@@ -33,7 +33,8 @@ export default ({ config }) => ({
     // Aceste variabile vor fi accesibile in aplicatie prin Constants.expoConfig.extra
     extra: {
       GOOGLE_PLACES_API: process.env.GOOGLE_PLACES_API,
-      WEATHER_API: process.env.WEATHER_API
+      WEATHER_API: process.env.WEATHER_API,
+      API_URL: process.env.API_URL
     },
 
     "plugins": [

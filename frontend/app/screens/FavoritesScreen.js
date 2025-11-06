@@ -13,6 +13,9 @@ import { getPlacePhotoUrl } from "../functions/googlePlacesFunction";
 import * as SecureStore from "expo-secure-store";
 import { getFavoritePlacesDetails } from "../functions/googlePlacesFunction";
 import axios from "axios";
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig.extra.API_URL;
 
 const FavoritesScreen = () => {
   const navigation = useNavigation();
@@ -36,7 +39,7 @@ const FavoritesScreen = () => {
         try {
           // Fetch the user's favorites from the backend
           const response = await axios.get(
-            `http://192.168.1.4:3000/favorites/${userId}`
+            `${API_URL}/favorites/${userId}`
           );
           const favoritePlaceIds = response.data.map((fav) => fav.placeId); // Get an array of placeIds
           const favoritePlacesDetails = await getFavoritePlacesDetails(
