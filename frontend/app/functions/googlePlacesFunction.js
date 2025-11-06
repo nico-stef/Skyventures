@@ -1,7 +1,8 @@
 // GooglePlacesService.js
 import axios from "axios";
+import Constants from 'expo-constants';
 
-const API_KEY = ""; //your API Key
+const API_KEY = Constants.expoConfig.extra.GOOGLE_PLACES_API;
 const BASE_URL = "https://maps.googleapis.com/maps/api/place";
 
 export const getNearbyPlaces = async (latitude, longitude, type) => {

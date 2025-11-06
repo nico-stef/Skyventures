@@ -1,5 +1,10 @@
-{
-  "expo": {
+// app.config.js
+import 'dotenv/config';
+
+export default ({ config }) => ({
+  ...config,
+
+  expo: {
     "name": "SkyVentures",
     "slug": "SkyVentures",
     "version": "1.0.0",
@@ -23,8 +28,16 @@
     "web": {
       "favicon": "./app/assets/favicon.png"
     },
+
+    // INJECTAREA VARIABILELOR DE MEDIU
+    // Aceste variabile vor fi accesibile in aplicatie prin Constants.expoConfig.extra
+    extra: {
+      GOOGLE_PLACES_API: process.env.GOOGLE_PLACES_API,
+      WEATHER_API: process.env.WEATHER_API
+    },
+
     "plugins": [
       "expo-secure-store"
     ]
   }
-}
+});
