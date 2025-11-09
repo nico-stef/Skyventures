@@ -26,25 +26,28 @@ export default function LoginScreen(props) {
     password: "",
   });
 
-  navigation.addListener("state", () => {
-    animationDoneLogin = false;
-  });
-
-  state = {
-    loadingProgress: new Animated.Value(0),
-  };
-
-  if (animationDoneLogin === false) {
-    Animated.timing(this.state.loadingProgress, {
-      toValue: 100,
-      duration: 700,
-      useNativeDriver: true,
-    }).start(() => {
-      animationDoneLogin = true;
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("state", () => {
+      animationDoneLogin = false;
+      // clear setInterval here and go back if needed
     });
-  }
 
-  const loadingProgress = this.state.loadingProgress;
+    return unsubscribe;
+  }, [navigation]);
+
+  const loadingProgress = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    if (!animationDoneLogin) {
+      Animated.timing(loadingProgress, {
+        toValue: 100,
+        duration: 700,
+        useNativeDriver: true,
+      }).start(() => {
+        animationDoneLogin = true;
+      });
+    }
+  }, [loadingProgress]);
 
   const moveDown = {
     transform: [

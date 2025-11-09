@@ -12,16 +12,16 @@ import { StartScreenStyles } from "../styles/StartScreenStyles";
 
 export default function StartScreen() {
   const navigation = useNavigation();
+  // animated value using hooks (functional component)
+  const loadingProgress = React.useRef(new Animated.Value(0)).current;
 
-  const loadingProgress = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
+  React.useEffect(() => {
     Animated.timing(loadingProgress, {
       toValue: 100,
       duration: 700,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [loadingProgress]);
 
   const opacityClearToVisible = {
     opacity: loadingProgress.interpolate({

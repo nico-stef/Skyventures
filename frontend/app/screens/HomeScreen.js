@@ -105,9 +105,16 @@ export default function HomeScreen(props) {
   const updateSearch = (search) => {
     setSearch(search);
   };
-  loadingState = {
-    loadingProgress: new Animated.Value(0),
-  };
+  // animated value for entrance animations
+  const loadingProgress = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(loadingProgress, {
+      toValue: 100,
+      duration: 700,
+      useNativeDriver: true,
+    }).start();
+  }, [loadingProgress]);
 
   const [favorites, setFavorites] = useState([]);
 
