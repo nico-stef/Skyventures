@@ -12,18 +12,16 @@ import { useNavigation } from "@react-navigation/native";
 import { globalStyles } from "../styles/globalStyles";
 export default function StartScreen(props) {
   const navigation = useNavigation();
+  // animated value using hooks (functional component)
+  const loadingProgress = React.useRef(new Animated.Value(0)).current;
 
-  state = {
-    loadingProgress: new Animated.Value(0),
-  };
-
-  Animated.timing(this.state.loadingProgress, {
-    toValue: 100,
-    duration: 700,
-    useNativeDriver: true,
-  }).start();
-
-  const loadingProgress = this.state.loadingProgress;
+  React.useEffect(() => {
+    Animated.timing(loadingProgress, {
+      toValue: 100,
+      duration: 700,
+      useNativeDriver: true,
+    }).start();
+  }, [loadingProgress]);
 
   const opacityClearToVisible = {
     opacity: loadingProgress.interpolate({

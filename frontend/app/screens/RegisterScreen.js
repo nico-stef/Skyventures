@@ -26,25 +26,28 @@ export default function RegisterScreen(props) {
     email: "",
     password: "",
   });
-  navigation.addListener("state", () => {
-    animationDoneRegister = false;
-    //clear setInterval here and go back
-  });
-
-  state = {
-    loadingProgress: new Animated.Value(0),
-  };
-  if (animationDoneRegister === false) {
-    Animated.timing(this.state.loadingProgress, {
-      toValue: 100,
-      duration: 700,
-      useNativeDriver: true,
-    }).start(() => {
-      animationDoneRegister = true;
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("state", () => {
+      animationDoneRegister = false;
+      // clear setInterval here and go back if needed
     });
-  }
 
-  const loadingProgress = this.state.loadingProgress;
+    return unsubscribe;
+  }, [navigation]);
+
+  const loadingProgress = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    if (!animationDoneRegister) {
+      Animated.timing(loadingProgress, {
+        toValue: 100,
+        duration: 700,
+        useNativeDriver: true,
+      }).start(() => {
+        animationDoneRegister = true;
+      });
+    }
+  }, [loadingProgress]);
 
   const moveDown = {
     transform: [
