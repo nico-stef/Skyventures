@@ -1,29 +1,27 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import {
   Text,
   SafeAreaView,
   Image,
-  Button,
   TouchableOpacity,
   Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import { globalStyles } from "../styles/globalStyles";
-export default function StartScreen(props) {
+import { StartScreenStyles } from "../styles/StartScreenStyles";
+
+export default function StartScreen() {
   const navigation = useNavigation();
 
-  state = {
-    loadingProgress: new Animated.Value(0),
-  };
+  const loadingProgress = useRef(new Animated.Value(0)).current;
 
-  Animated.timing(this.state.loadingProgress, {
-    toValue: 100,
-    duration: 700,
-    useNativeDriver: true,
-  }).start();
-
-  const loadingProgress = this.state.loadingProgress;
+  useEffect(() => {
+    Animated.timing(loadingProgress, {
+      toValue: 100,
+      duration: 700,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   const opacityClearToVisible = {
     opacity: loadingProgress.interpolate({
@@ -32,6 +30,7 @@ export default function StartScreen(props) {
       extrapolate: "clamp",
     }),
   };
+
   const moveDown = {
     transform: [
       {
@@ -55,36 +54,49 @@ export default function StartScreen(props) {
       },
     ],
   };
+
   return (
     <LinearGradient
       start={{ x: 0, y: 1 }}
       end={{ x: 1, y: 1 }}
       colors={["#004aad", "#886ae6"]}
-      style={globalStyles.backgroundStart}
+      style={StartScreenStyles.backgroundStart}
     >
-      <SafeAreaView style={globalStyles.logoContainerStart}>
-        <Animated.View style={[opacityClearToVisible, moveDown]}>
+      <SafeAreaView style={StartScreenStyles.logoContainerStart}>
+        <Animated.View
+          style={[
+            opacityClearToVisible,
+            moveDown,
+            { alignItems: "center", justifyContent: "center", width: "100%" }
+          ]}
+        >
           <Image
             source={require("../assets/skyventures-logo.png")}
-            style={globalStyles.logoStart}
+            style={StartScreenStyles.logoStart}
           />
-          <Text style={globalStyles.logoTextStart}>SkyVentures</Text>
+          <Text style={StartScreenStyles.logoTextStart}>SkyVentures</Text>
         </Animated.View>
       </SafeAreaView>
 
-      <SafeAreaView style={globalStyles.registerContainerStart}>
-        <Animated.View style={[opacityClearToVisible, moveUp]}>
+      <SafeAreaView style={StartScreenStyles.registerContainerStart}>
+        <Animated.View style={[opacityClearToVisible, moveUp, { width: "100%", alignItems: "center" }]}>
           <TouchableOpacity
-            style={globalStyles.registerButtonStart}
+            style={StartScreenStyles.registerButtonStart}
             onPress={() => navigation.navigate("Register")}
+            activeOpacity={0.8}
           >
-            <Text style={globalStyles.registerTextStart}>Get Started</Text>
+            <Text style={StartScreenStyles.registerTextStart}>Get Started</Text>
           </TouchableOpacity>
-          <Button
-            title="I already have an account"
-            color="#000"
+
+          <TouchableOpacity
+            style={StartScreenStyles.loginButtonStart}
             onPress={() => navigation.navigate("Login")}
-          ></Button>
+            activeOpacity={0.7}
+          >
+            <Text style={StartScreenStyles.loginTextStart}>
+              I already have an account
+            </Text>
+          </TouchableOpacity>
         </Animated.View>
       </SafeAreaView>
     </LinearGradient>

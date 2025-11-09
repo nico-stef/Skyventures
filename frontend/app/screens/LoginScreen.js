@@ -4,18 +4,17 @@ import {
   Text,
   SafeAreaView,
   Image,
-  Button,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Animated,
   TextInput,
   Keyboard,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { login } from "../functions/authFunctions";
-import { globalStyles } from "../styles/globalStyles";
-import { Alert } from "react-native";
+import { loginStyles } from "../styles/LoginStyles";
 import * as SecureStore from "expo-secure-store";
 
 var animationDoneLogin = false;
@@ -29,12 +28,12 @@ export default function LoginScreen(props) {
 
   navigation.addListener("state", () => {
     animationDoneLogin = false;
-    //clear setInterval here and go back
   });
 
   state = {
     loadingProgress: new Animated.Value(0),
   };
+
   if (animationDoneLogin === false) {
     Animated.timing(this.state.loadingProgress, {
       toValue: 100,
@@ -95,53 +94,58 @@ export default function LoginScreen(props) {
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
         colors={["#004aad", "#886ae6"]}
-        style={globalStyles.backgroundLogin}
+        style={loginStyles.background}
       >
-        <SafeAreaView style={globalStyles.logoContainerLogin}>
+        <SafeAreaView style={loginStyles.logoContainer}>
           <Animated.View style={moveDown}>
             <Image
               source={require("../assets/skyventures-logo.png")}
-              style={globalStyles.logoLogin}
+              style={loginStyles.logo}
             />
-            <Text style={globalStyles.logoTextLogin}>Welcome Back</Text>
+            <Text style={loginStyles.welcomeText}>Welcome Back</Text>
           </Animated.View>
         </SafeAreaView>
 
-        <Animated.View
-          style={[opacityClearToVisible, globalStyles.loginContainterLogin, ,]}
-        >
-          <View style={globalStyles.credintialsContainerLogin}>
+        <Animated.View style={[opacityClearToVisible, loginStyles.loginContainer]}>
+          <View style={loginStyles.credentialsContainer}>
             <TextInput
               inputMode="email"
-              style={globalStyles.inputControlLogin}
-              autoCapitalize="no"
+              style={loginStyles.inputControl}
+              autoCapitalize="none"
               autoCorrect={false}
               textContentType="oneTimeCode"
               onChangeText={(email) => setForm({ ...form, email })}
               value={form.email}
               placeholder="Email"
+              placeholderTextColor="#999"
             />
             <TextInput
               secureTextEntry
-              style={globalStyles.inputControlLogin}
+              style={loginStyles.inputControl}
               onChangeText={(password) => setForm({ ...form, password })}
               value={form.password}
               placeholder="Password"
+              placeholderTextColor="#999"
             />
 
             <TouchableOpacity
-              style={globalStyles.loginButtonLogin}
+              style={loginStyles.loginButton}
               onPress={handleLogin}
+              activeOpacity={0.8}
             >
-              <Text style={globalStyles.loginTextLogin}>Login</Text>
+              <Text style={loginStyles.loginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
 
-          <Button
-            title="Don't have an account? Register here"
+          <TouchableOpacity
+            style={loginStyles.registerContainer}
             onPress={() => navigation.navigate("Register")}
-            color="#000"
-          ></Button>
+            activeOpacity={0.7}
+          >
+            <Text style={loginStyles.registerText}>
+              Don't have an account? Register here
+            </Text>
+          </TouchableOpacity>
         </Animated.View>
       </LinearGradient>
     </TouchableWithoutFeedback>

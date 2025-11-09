@@ -4,18 +4,17 @@ import {
   Text,
   SafeAreaView,
   Image,
-  Button,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Animated,
   TextInput,
   Keyboard,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { register } from "../functions/authFunctions";
-import { globalStyles } from "../styles/globalStyles";
-import { Alert } from "react-native";
+import { registerStyles } from "../styles/RegisterStyles";
 
 var animationDoneRegister = false;
 
@@ -26,14 +25,15 @@ export default function RegisterScreen(props) {
     email: "",
     password: "",
   });
+
   navigation.addListener("state", () => {
     animationDoneRegister = false;
-    //clear setInterval here and go back
   });
 
   state = {
     loadingProgress: new Animated.Value(0),
   };
+
   if (animationDoneRegister === false) {
     Animated.timing(this.state.loadingProgress, {
       toValue: 100,
@@ -91,69 +91,69 @@ export default function RegisterScreen(props) {
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
         colors={["#004aad", "#886ae6"]}
-        style={globalStyles.backgroundRegister}
+        style={registerStyles.background}
       >
-        <SafeAreaView style={globalStyles.logoContainerRegister}>
+        <SafeAreaView style={registerStyles.logoContainer}>
           <Animated.View style={moveDown}>
             <Image
               source={require("../assets/skyventures-logo.png")}
-              style={globalStyles.logoRegister}
+              style={registerStyles.logo}
             />
-            <Text style={globalStyles.logoTextRegister}>Create Account</Text>
+            <Text style={registerStyles.createAccountText}>Create Account</Text>
           </Animated.View>
         </SafeAreaView>
 
-        <Animated.View
-          style={[
-            opacityClearToVisible,
-            globalStyles.registerContainterRegister,
-            ,
-          ]}
-        >
-          <View style={globalStyles.credintialsContainerRegister}>
+        <Animated.View style={[opacityClearToVisible, registerStyles.registerContainer]}>
+          <View style={registerStyles.credentialsContainer}>
             <TextInput
               inputMode="text"
-              style={globalStyles.inputControlRegister}
-              autoCapitalize="no"
+              style={registerStyles.inputControl}
+              autoCapitalize="none"
               autoCorrect={false}
               textContentType="oneTimeCode"
               onChangeText={(username) => setForm({ ...form, username })}
               value={form.username}
               placeholder="Username"
+              placeholderTextColor="#999"
             />
             <TextInput
               inputMode="email"
-              style={globalStyles.inputControlRegister}
+              style={registerStyles.inputControl}
               autoCorrect={false}
-              autoCapitalize="no"
+              autoCapitalize="none"
               textContentType="oneTimeCode"
               onChangeText={(email) => setForm({ ...form, email })}
               value={form.email}
               placeholder="Email"
+              placeholderTextColor="#999"
             />
             <TextInput
               secureTextEntry
-              style={globalStyles.inputControlRegister}
+              style={registerStyles.inputControl}
               onChangeText={(password) => setForm({ ...form, password })}
               value={form.password}
               placeholder="Password"
+              placeholderTextColor="#999"
             />
 
             <TouchableOpacity
-              style={globalStyles.registerButtonRegister}
+              style={registerStyles.registerButton}
               onPress={handleRegister}
+              activeOpacity={0.8}
             >
-              <Text style={globalStyles.registerTextRegister}>Sign up</Text>
+              <Text style={registerStyles.registerButtonText}>Sign up</Text>
             </TouchableOpacity>
           </View>
 
-          <Button
-            title="Already have an account? Login here"
-            onPress={() => {
-              navigation.navigate("Login");
-            }}
-            color="#000"
-          ></Button>
+          <TouchableOpacity
+            style={registerStyles.loginContainer}
+            onPress={() => navigation.navigate("Login")}
+            activeOpacity={0.7}
+          >
+            <Text style={registerStyles.loginText}>
+              Already have an account? Login here
+            </Text>
+          </TouchableOpacity>
         </Animated.View>
       </LinearGradient>
     </TouchableWithoutFeedback>
