@@ -67,12 +67,12 @@ export const loginStyles = StyleSheet.create({
 
     loginButton: {
         height: 55,
-        backgroundColor: "#004aad",
+        backgroundColor: "#8B5CF6",
         borderRadius: 12,
         justifyContent: "center",
         alignItems: "center",
         marginTop: 10,
-        shadowColor: "#004aad",
+        shadowColor: "#8B5CF6",
         shadowOffset: {
             width: 0,
             height: 4,

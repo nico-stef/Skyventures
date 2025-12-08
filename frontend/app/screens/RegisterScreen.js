@@ -92,7 +92,7 @@ export default function RegisterScreen(props) {
       <LinearGradient
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
-        colors={["#004aad", "#886ae6"]}
+        colors={["#8B5CF6", "#b794f6"]}
         style={registerStyles.background}
       >
         <SafeAreaView style={registerStyles.logoContainer}>

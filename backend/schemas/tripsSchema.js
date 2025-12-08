@@ -1,0 +1,65 @@
+const pool = require('../config/db');
+
+const tripsSchemaCheck = async () => {
+  const tripsTableQuery = `
+    CREATE TABLE IF NOT EXISTS trips (
+      tripId INT AUTO_INCREMENT PRIMARY KEY,
+      userId VARCHAR(36) NOT NULL,
+      destination VARCHAR(255) NOT NULL,
+      startDate DATE NOT NULL,
+      endDate DATE NOT NULL,
+      budget DECIMAL(10, 2) DEFAULT 0,
+      description TEXT,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+    )
+  `;
+
+  const itineraryItemsTableQuery = `
+    CREATE TABLE IF NOT EXISTS itinerary_items (
+      itemId INT AUTO_INCREMENT PRIMARY KEY,
+      tripId INT NOT NULL,
+      dayDate DATE NOT NULL,
+      placeName VARCHAR(255) NOT NULL,
+      placeId VARCHAR(255),
+      placeAddress TEXT,
+      placePhoto TEXT,
+      placeRating DECIMAL(2, 1),
+      notes TEXT,
+      orderIndex INT DEFAULT 0,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (tripId) REFERENCES trips(tripId) ON DELETE CASCADE
+    )
+  `;
+
+  const expensesTableQuery = `
+    CREATE TABLE IF NOT EXISTS expenses (
+      expenseId INT AUTO_INCREMENT PRIMARY KEY,
+      tripId INT NOT NULL,
+      category VARCHAR(50) NOT NULL,
+      amount DECIMAL(10, 2) NOT NULL,
+      description VARCHAR(255),
+      expenseDate DATE NOT NULL,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (tripId) REFERENCES trips(tripId) ON DELETE CASCADE
+    )
+  `;
+
+  try {
+    await pool.execute(tripsTableQuery);
+    console.log("Trips schema checked");
+    
+    await pool.execute(itineraryItemsTableQuery);
+    console.log("Itinerary items schema checked");
+    
+    await pool.execute(expensesTableQuery);
+    console.log("Expenses schema checked");
+  } catch (err) {
+    console.error("Trips tables creation error:", err);
+    throw err;
+  }
+};
+
+module.exports = {
+  tripsSchemaCheck
+};

@@ -5,6 +5,7 @@ const cors = require("cors");
 const session = require("express-session");
 const { favoritesSchemaCheck } = require('./schemas/favoritesSchema');
 const { userSchemaCheck } = require('./schemas/userSchema');
+const { tripsSchemaCheck } = require('./schemas/tripsSchema');
 
 app.use(cors());
 app.use(express.json());
@@ -18,6 +19,7 @@ app.use(session({
 
 app.use("/", require("./routes/authRoutes"));
 app.use("/favorites", require("./routes/favoritesRoutes"));
+app.use("/trips", require("./routes/tripsRoutes"));
 
 // Global Error Handler Middleware function
 app.use((err, req, res, next) => {
@@ -32,12 +34,17 @@ app.use((err, req, res, next) => {
 
 // Listen on pc port
 const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0'; // Listen on all network interfaces
 Promise.all([
   favoritesSchemaCheck(),
-  userSchemaCheck()
+  userSchemaCheck(),
+  tripsSchemaCheck()
 ])
   .then(() => {
-    app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
+    app.listen(PORT, HOST, () => {
+      console.log(`Server running on PORT ${PORT}`);
+      console.log(`Server accessible at http://192.168.1.3:${PORT}`);
+    });
   })
   .catch(err => {
     console.error("Eroare la inițializarea schemelor bazei de date:", err);

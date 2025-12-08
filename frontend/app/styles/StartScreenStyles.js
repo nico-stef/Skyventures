@@ -56,7 +56,7 @@ export const StartScreenStyles = StyleSheet.create({
     },
 
     registerTextStart: {
-        color: "#004aad",
+        color: "#8B5CF6",
         fontSize: 20,
         fontWeight: "600",
         textAlign: "center",

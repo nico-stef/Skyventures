@@ -67,8 +67,24 @@ const deleteFavorite = async (req, res) => {
     }
 }
 
+const checkFavorite = async (req, res) => {
+    const { userId, placeId } = req.params;
+
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM favorites WHERE userId = ? AND placeId = ?',
+            [userId, placeId]
+        );
+
+        res.status(200).json({ isFavorite: rows.length > 0 });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     addToFavorites,
     getFavorites,
-    deleteFavorite
+    deleteFavorite,
+    checkFavorite
 }

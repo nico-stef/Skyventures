@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,16 @@ import {
   TouchableWithoutFeedback,
   Animated,
   FlatList,
+  RefreshControl,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Dropdown } from "react-native-element-dropdown";
 import * as Location from "expo-location";
 import {
   getNearbyPlaces,
   getPlacePhotoUrl,
 } from "../functions/googlePlacesFunction";
-import { globalStyles } from "../styles/globalStyles";
+import { tripsStyles } from "../styles/TripsStyles";
 import * as SecureStore from "expo-secure-store";
 import { logout } from "../functions/authFunctions";
 import axios from "axios";
@@ -33,6 +34,7 @@ export default function HomeScreen(props) {
   const [errorMsg, setErrorMsg] = useState(null);
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -81,6 +83,14 @@ export default function HomeScreen(props) {
       console.error(err);
     } finally {
       setLoading(false); // Stop loading
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    if (location) {
+      fetchNearbyPlaces(location.latitude, location.longitude);
     }
   };
 
@@ -118,212 +128,178 @@ export default function HomeScreen(props) {
 
   const [favorites, setFavorites] = useState([]);
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      if (userId) {
-        try {
-          // Fetch the user's favorites from the backend
-          const response = await axios.get(
-            `${API_URL}/favorites/${userId}`
-          );
-          const favoritePlaces = response.data.map((fav) => fav.placeId); // Get an array of placeIds
-          setFavorites(favoritePlaces); // Set the favorites state
-        } catch (err) {
-          console.log("Error fetching favorites: ", err);
-        }
+  const fetchFavorites = async () => {
+    if (userId) {
+      try {
+        const response = await axios.get(`${API_URL}/favorites/${userId}`);
+        const favoritePlaces = response.data.map((fav) => fav.placeId);
+        setFavorites(favoritePlaces);
+      } catch (err) {
+        console.log("Error fetching favorites: ", err);
       }
-    };
+    }
+  };
 
-    fetchFavorites();
-  }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        fetchFavorites();
+      }
+    }, [userId])
+  );
 
   // Function to toggle favorite status for each item
-  const handleAddFavorites = (placeId) => {
-    setFavorites((prevFavorites) => {
-      const isFavorite = prevFavorites.includes(placeId); // Check if the place is already a favorite
-      if (isFavorite) {
-        // If it's already a favorite, remove it from the array
-        return prevFavorites.filter((id) => id !== placeId);
-      } else {
-        // If it's not a favorite, add it to the array
-        return [...prevFavorites, placeId];
-      }
-    });
-
+  const handleAddFavorites = async (placeId) => {
+    const isFavorite = favorites.includes(placeId);
+    
     const data = {
       userId: userId,
       placeId: placeId,
     };
 
-    console.log(userId, placeId);
-
-    axios.post(`${API_URL}/favorites/add`, data)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error("Error sending data: ", error);
-      });
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        await axios.delete(`${API_URL}/favorites/delete`, { data });
+        setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== placeId));
+        console.log("Removed from favorites");
+      } else {
+        // Add to favorites
+        await axios.post(`${API_URL}/favorites/add`, data);
+        setFavorites((prevFavorites) => [...prevFavorites, placeId]);
+        console.log("Added to favorites");
+      }
+    } catch (error) {
+      console.error("Error toggling favorite: ", error);
+    }
   };
 
   return (
-    <SafeAreaView style={globalStyles.backgroundHome}>
-      <View style={globalStyles.userContainerHome}>
-        <View style={[globalStyles.welcomeContainerHome, { paddingTop: 10 }]}>
-          <Text style={{ fontSize: 22, color: "#000" }}>Hello, {username}</Text>
-          <Text style={{ fontSize: 16, color: "#888" }}>
-            Welcome to Skyventures
-          </Text>
+    <SafeAreaView style={tripsStyles.container}>
+      <View style={tripsStyles.header}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View>
+            <Text style={tripsStyles.headerTitle}>Explore</Text>
+            <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 5 }}>Hello, {username}</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => logout(navigation)}
+          >
+            <Image
+              source={require("../assets/exit.png")}
+              style={{ width: 30, height: 30, tintColor: 'white' }}
+            />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={{ flex: 0.2, top: 15 }}
-          onPress={() => logout(navigation)}
-        >
-          <Image
-            source={require("../assets/exit.png")}
-            style={{ width: 40, height: 40 }}
-          />
-        </TouchableOpacity>
       </View>
 
-      <Text style={globalStyles.selectYourTripTextHome}>
-        Select your next trip
-      </Text>
-      <View style={globalStyles.autocompleteContainerHome}>
+      <View style={{ backgroundColor: '#f5f5f5', paddingHorizontal: 15, paddingTop: 15 }}>
+        <Text style={{ fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 10 }}>
+          What are you looking for?
+        </Text>
         <Dropdown
-          style={globalStyles.dropdownHome}
-          placeholderStyle={globalStyles.placeholderStyleHome}
-          selectedTextStyle={globalStyles.selectedTextStyleHome}
-          inputSearchStyle={globalStyles.inputSearchStyleHome}
-          iconStyle={globalStyles.iconStyleHome}
+          style={[tripsStyles.input, { marginBottom: 15 }]}
+          placeholderStyle={{ fontSize: 14, color: '#999' }}
+          selectedTextStyle={{ fontSize: 14, color: '#333' }}
+          inputSearchStyle={{ fontSize: 14 }}
+          iconStyle={{ width: 20, height: 20 }}
           data={data}
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder="Select item"
+          placeholder="Select category"
           searchPlaceholder="Search..."
           value={value}
           onChange={handlePlaceTypeSelection}
         />
       </View>
       <FlatList
-        style={globalStyles.scrollableContainerHome}
+        style={{ flex: 1, backgroundColor: '#f5f5f5' }}
+        contentContainerStyle={tripsStyles.tripsList}
         data={places}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.place_id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={({ item }) => (
-          <View style={globalStyles.cardContainerHome}>
+          <TouchableOpacity
+            style={tripsStyles.tripCard}
+            onPress={() => navigation.navigate("PlaceScreen", { place: item })}
+            activeOpacity={0.7}
+          >
             {item.photos && item.photos.length > 0 ? (
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  navigation.navigate("PlaceScreen", { place: item })
-                }
-              >
-                <Image
-                  source={{
-                    uri: getPlacePhotoUrl(
-                      item.photos[0].photo_reference,
-                      400,
-                      400
-                    ),
-                  }}
-                  style={globalStyles.placeToVisitImageContainerHome}
-                />
-              </TouchableWithoutFeedback>
+              <Image
+                source={{
+                  uri: getPlacePhotoUrl(
+                    item.photos[0].photo_reference,
+                    400,
+                    400
+                  ),
+                }}
+                style={{
+                  width: '100%',
+                  height: 180,
+                  borderRadius: 10,
+                  marginBottom: 12,
+                }}
+              />
             ) : (
-              <TouchableOpacity
-                style={globalStyles.placeToVisitWithoutImageContainerHome}
-                onPress={() =>
-                  navigation.navigate("PlaceScreen", { place: item })
-                }
-              >
-                <Text>No Image</Text>
-              </TouchableOpacity>
+              <View style={{
+                width: '100%',
+                height: 180,
+                borderRadius: 10,
+                backgroundColor: '#e0e0e0',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 12,
+              }}>
+                <Text style={{ color: '#999' }}>No Image</Text>
+              </View>
             )}
-            <View style={globalStyles.cardContent}>
+            
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Text style={[tripsStyles.tripDestination, { flex: 1, marginBottom: 8, marginRight: 10 }]} numberOfLines={2}>
+                {item.name}
+              </Text>
               <TouchableOpacity
-                onPress={() => handleAddFavorites(item.place_id)}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleAddFavorites(item.place_id);
+                }}
+                style={{ padding: 4 }}
               >
-                <Image
-                  source={require("../assets/heart.png")}
-                  style={{
-                    position: "static",
-                    left: 100,
-                    bottom: "10%",
-                    tintColor: favorites.includes(item.place_id)
-                      ? "red"
-                      : "black",
-                    width: 40,
-                    height: 40,
-                  }}
-                />
-              </TouchableOpacity>
-
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  navigation.navigate("PlaceScreen", { place: item })
-                }
-              >
-                <Text style={globalStyles.placeNameHome} numberOfLines={3}>
-                  {item.name}
+                <Text style={{
+                  fontSize: 36,
+                  color: favorites.includes(item.place_id) ? "red" : "#ccc",
+                }}>
+                  ♥
                 </Text>
-              </TouchableWithoutFeedback>
-
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  navigation.navigate("PlaceScreen", { place: item })
-                }
-              >
-                <Text style={{ fontSize: 14 }}>
-                  {item.rating ? `${item.rating}/5` : "N/A"}
-                </Text>
-              </TouchableWithoutFeedback>
-
-              <TouchableOpacity
-                style={{ top: 10, flexDirection: "row" }}
-                onPress={() =>
-                  navigation.navigate("PlaceScreen", { place: item })
-                }
-              >
-                <Text style={{ fontSize: 14, marginRight: 10, top: 3 }}>
-                  Tap to see more
-                </Text>
-                <Image
-                  source={require("../assets/right-arrow.png")}
-                  style={{
-                    width: 24,
-                    height: 24,
-                  }}
-                />
               </TouchableOpacity>
             </View>
-          </View>
+
+            <View style={tripsStyles.tripStats}>
+              <View style={tripsStyles.tripStat}>
+                <Text style={tripsStyles.tripStatValue}>
+                  {item.rating ? item.rating.toFixed(1) : "N/A"}
+                </Text>
+                <Text style={tripsStyles.tripStatLabel}>Rating</Text>
+              </View>
+              {item.user_ratings_total && (
+                <View style={tripsStyles.tripStat}>
+                  <Text style={tripsStyles.tripStatValue}>
+                    {item.user_ratings_total}
+                  </Text>
+                  <Text style={tripsStyles.tripStatLabel}>Reviews</Text>
+                </View>
+              )}
+              <View style={[tripsStyles.tripStat, { alignItems: 'flex-end' }]}>
+                <Text style={{ fontSize: 12, color: '#8B5CF6', fontWeight: '500' }}>Tap for details →</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         )}
       />
-      <View style={globalStyles.menuContainerHome}>
-        <TouchableOpacity>
-          <Image
-            source={require("../assets/home.png")}
-            style={{ width: 40, height: 40 }}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate("WeatherScreen")}>
-          <Image
-            source={require("../assets/compass.png")}
-            style={{ width: 40, height: 40 }}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate("FavoritesScreen")}
-        >
-          <Image
-            source={require("../assets/heart.png")}
-            style={{ width: 40, height: 40 }}
-          />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
