@@ -20,6 +20,7 @@ import {
 import OverviewTab from "./tripTabs/OverviewTab";
 import ItineraryTab from "./tripTabs/ItineraryTab";
 import ExpensesTab from "./tripTabs/ExpensesTab";
+import MapTab from "./tripTabs/MapTab";
 
 export default function TripDetailScreen() {
   const navigation = useNavigation();
@@ -227,6 +228,23 @@ export default function TripDetailScreen() {
             Expenses
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            tripsStyles.tab,
+            activeTab === "map" && tripsStyles.activeTab,
+          ]}
+          onPress={() => setActiveTab("map")}
+        >
+          <Text
+            style={[
+              tripsStyles.tabText,
+              activeTab === "map" && tripsStyles.activeTabText,
+            ]}
+          >
+            Map
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -262,6 +280,12 @@ export default function TripDetailScreen() {
             categoryTotals={categoryTotals}
             budget={parseFloat(trip.budget || 0)}
             onUpdate={fetchExpenseData}
+          />
+        )}
+
+        {activeTab === "map" && (
+          <MapTab
+            items={itineraryItems}
           />
         )}
       </ScrollView>
