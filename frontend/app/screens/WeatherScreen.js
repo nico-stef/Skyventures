@@ -53,7 +53,12 @@ const WeatherScreen = () => {
   const fetchFavorites = async () => {
     if (userId) {
       try {
-        const response = await axios.get(`${API_URL}/favorites/${userId}`);
+        const token = await SecureStore.getItemAsync("token");
+        const response = await axios.get(`${API_URL}/favorites`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
         const favoritePlaces = response.data.map((fav) => fav.placeId);
         setFavorites(favoritePlaces);
       } catch (err) {
@@ -173,21 +178,30 @@ const WeatherScreen = () => {
 
   const handleAddFavorites = async (placeId) => {
     const isFavorite = favorites.includes(placeId);
-    
+
     const data = {
-      userId: userId,
       placeId: placeId,
     };
 
     try {
+      const token = await SecureStore.getItemAsync("token");
       if (isFavorite) {
         // Remove from favorites
-        await axios.delete(`${API_URL}/favorites/delete`, { data });
+        await axios.delete(`${API_URL}/favorites/delete`, {
+          data,
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
         setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== placeId));
         console.log("Removed from favorites");
       } else {
         // Add to favorites
-        await axios.post(`${API_URL}/favorites/add`, data);
+        await axios.post(`${API_URL}/favorites/add`, data, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
         setFavorites((prevFavorites) => [...prevFavorites, placeId]);
         console.log("Added to favorites");
       }
@@ -257,7 +271,7 @@ const WeatherScreen = () => {
                 <Text style={{ color: '#999' }}>No Image</Text>
               </View>
             )}
-            
+
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Text style={[tripsStyles.tripDestination, { flex: 1, marginBottom: 8, marginRight: 10 }]} numberOfLines={2}>
                 {item.name}

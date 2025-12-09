@@ -76,11 +76,10 @@ export default function RegisterScreen(props) {
 
     try {
       const result = await register(form.username, form.email, form.password);
-
       if (result.error) {
         Alert.alert("Register Failed", result.error);
       } else {
-        navigation.navigate("Home");
+        navigation.navigate("Login");
       }
     } catch (error) {
       Alert.alert("Register Failed", error.message);

@@ -76,7 +76,6 @@ export default function EditTripModal({ visible, onClose, onSuccess, trip, userI
     try {
       const result = await updateTrip(
         trip.tripId,
-        userId,
         destination.trim(),
         formatDateDisplay(startDate),
         formatDateDisplay(endDate),

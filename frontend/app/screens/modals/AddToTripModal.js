@@ -33,7 +33,7 @@ export default function AddToTripModal({
   const fetchTrips = async () => {
     setLoading(true);
     try {
-      const result = await getUserTrips(userId);
+      const result = await getUserTrips();
       if (result.error) {
         Alert.alert("Error", result.error);
       } else {
@@ -95,16 +95,12 @@ export default function AddToTripModal({
       placeName: placeData.name,
       placeId: placeData.place_id || null,
       placeAddress: placeData.vicinity || placeData.formatted_address || null,
-      placePhoto: placeData.photoUrl || null,
-      placeRating: placeData.rating || null,
       notes: '',
-      orderIndex: 0,
     };
 
     try {
       const result = await addItineraryItem(
         selectedTrip.tripId,
-        userId,
         itemData
       );
 

@@ -13,7 +13,6 @@ import PlaceScreen from "./app/screens/PlaceScreen";
 import FavoritesScreen from "./app/screens/FavoritesScreen";
 import TripsScreen from "./app/screens/TripsScreen";
 import TripDetailScreen from "./app/screens/TripDetailScreen";
-import AttractionDetailScreen from "./app/screens/AttractionDetailScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -49,8 +48,8 @@ function MainTabs() {
         },
       }}
     >
-      <Tab.Screen 
-        name="HomeTab" 
+      <Tab.Screen
+        name="HomeTab"
         component={HomeScreen}
         options={{
           tabBarLabel: 'Explore',
@@ -59,8 +58,8 @@ function MainTabs() {
           ),
         }}
       />
-      <Tab.Screen 
-        name="TripsTab" 
+      <Tab.Screen
+        name="TripsTab"
         component={TripsScreen}
         options={{
           tabBarLabel: 'My Trips',
@@ -69,8 +68,8 @@ function MainTabs() {
           ),
         }}
       />
-      <Tab.Screen 
-        name="WeatherTab" 
+      <Tab.Screen
+        name="WeatherTab"
         component={WeatherScreen}
         options={{
           tabBarLabel: 'Weather',
@@ -79,8 +78,8 @@ function MainTabs() {
           ),
         }}
       />
-      <Tab.Screen 
-        name="FavoritesTab" 
+      <Tab.Screen
+        name="FavoritesTab"
         component={FavoritesScreen}
         options={{
           tabBarLabel: 'Favorites',
@@ -107,7 +106,6 @@ export default function App() {
         <Stack.Screen name="WeatherScreen" component={WeatherScreen} />
         <Stack.Screen name="PlaceScreen" component={PlaceScreen} />
         <Stack.Screen name="TripDetail" component={TripDetailScreen} />
-        <Stack.Screen name="AttractionDetail" component={AttractionDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

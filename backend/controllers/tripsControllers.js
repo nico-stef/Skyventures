@@ -2,11 +2,7 @@ const pool = require('../config/db');
 
 // Get all trips for a user
 const getUserTrips = async (req, res) => {
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     const [trips] = await pool.query(
@@ -29,11 +25,7 @@ const getUserTrips = async (req, res) => {
 // Get single trip details
 const getTripById = async (req, res) => {
   const { tripId } = req.params;
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     const [trips] = await pool.query(
@@ -59,9 +51,10 @@ const getTripById = async (req, res) => {
 
 // Create new trip
 const createTrip = async (req, res) => {
-  const { userId, destination, startDate, endDate, budget, description } = req.body;
+  const userId = req.user.userId; // Get from JWT token
+  const { destination, startDate, endDate, budget, description } = req.body;
 
-  if (!userId || !destination || !startDate || !endDate) {
+  if (!destination || !startDate || !endDate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -90,11 +83,8 @@ const createTrip = async (req, res) => {
 // Update trip
 const updateTrip = async (req, res) => {
   const { tripId } = req.params;
-  const { userId, destination, startDate, endDate, budget, description } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
+  const { destination, startDate, endDate, budget, description } = req.body;
 
   try {
     const [result] = await pool.query(
@@ -126,11 +116,7 @@ const updateTrip = async (req, res) => {
 // Delete trip
 const deleteTrip = async (req, res) => {
   const { tripId } = req.params;
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     const [result] = await pool.query(
@@ -152,11 +138,7 @@ const deleteTrip = async (req, res) => {
 // Get itinerary items for a trip
 const getItineraryItems = async (req, res) => {
   const { tripId } = req.params;
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     // Verify trip belongs to user
@@ -172,7 +154,7 @@ const getItineraryItems = async (req, res) => {
     const [items] = await pool.query(
       `SELECT * FROM itinerary_items 
        WHERE tripId = ? 
-       ORDER BY dayDate ASC, orderIndex ASC`,
+       ORDER BY dayDate ASC, startTime ASC`,
       [tripId]
     );
 
@@ -186,26 +168,15 @@ const getItineraryItems = async (req, res) => {
 // Add itinerary item
 const addItineraryItem = async (req, res) => {
   const { tripId } = req.params;
+  const userId = req.user.userId; // Get from JWT token
   const {
-    userId,
     dayDate,
     startTime,
     placeName,
     placeId,
     placeAddress,
-    placePhoto,
-    placeRating,
-    notes,
-    orderIndex
+    notes
   } = req.body;
-
-  console.log('Received itinerary item data:');
-  console.log('tripId:', tripId);
-  console.log('userId:', userId);
-  console.log('dayDate:', dayDate);
-  console.log('startTime:', startTime);
-  console.log('placeName:', placeName);
-  console.log('Full body:', req.body);
 
   if (!userId || !dayDate || !placeName) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -222,13 +193,11 @@ const addItineraryItem = async (req, res) => {
       return res.status(404).json({ error: "Trip not found" });
     }
 
-    console.log('Inserting into database with startTime:', startTime);
-
     const [result] = await pool.query(
       `INSERT INTO itinerary_items 
-       (tripId, dayDate, startTime, placeName, placeId, placeAddress, placePhoto, placeRating, notes, orderIndex) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [tripId, dayDate, startTime, placeName, placeId, placeAddress, placePhoto, placeRating, notes, orderIndex || 0]
+       (tripId, dayDate, startTime, placeName, placeId, placeAddress, notes) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [tripId, dayDate, startTime, placeName, placeId, placeAddress, notes]
     );
 
     const [newItem] = await pool.query(
@@ -251,11 +220,15 @@ const addItineraryItem = async (req, res) => {
 // Update itinerary item
 const updateItineraryItem = async (req, res) => {
   const { tripId, itemId } = req.params;
-  const { userId, dayDate, placeName, notes, orderIndex } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
+  const {
+    dayDate,
+    startTime,
+    placeName,
+    placeId,
+    placeAddress,
+    notes
+  } = req.body;
 
   try {
     // Verify trip belongs to user
@@ -270,9 +243,9 @@ const updateItineraryItem = async (req, res) => {
 
     const [result] = await pool.query(
       `UPDATE itinerary_items 
-       SET dayDate = ?, placeName = ?, notes = ?, orderIndex = ?
+       SET dayDate = ?, startTime = ?, placeName = ?, placeId = ?, placeAddress = ?, notes = ?
        WHERE itemId = ? AND tripId = ?`,
-      [dayDate, placeName, notes, orderIndex, itemId, tripId]
+      [dayDate, startTime, placeName, placeId, placeAddress, notes, itemId, tripId]
     );
 
     if (result.affectedRows === 0) {
@@ -297,11 +270,7 @@ const updateItineraryItem = async (req, res) => {
 // Delete itinerary item
 const deleteItineraryItem = async (req, res) => {
   const { tripId, itemId } = req.params;
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     // Verify trip belongs to user
@@ -333,11 +302,7 @@ const deleteItineraryItem = async (req, res) => {
 // Get expenses for a trip
 const getExpenses = async (req, res) => {
   const { tripId } = req.params;
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     // Verify trip belongs to user
@@ -376,9 +341,10 @@ const getExpenses = async (req, res) => {
 // Add expense
 const addExpense = async (req, res) => {
   const { tripId } = req.params;
-  const { userId, category, amount, description, expenseDate } = req.body;
+  const userId = req.user.userId; // Get from JWT token
+  const { category, amount, description, expenseDate } = req.body;
 
-  if (!userId || !category || !amount || !expenseDate) {
+  if (!category || !amount || !expenseDate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -417,11 +383,7 @@ const addExpense = async (req, res) => {
 // Delete expense
 const deleteExpense = async (req, res) => {
   const { tripId, expenseId } = req.params;
-  const userId = req.query.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
-  }
+  const userId = req.user.userId; // Get from JWT token
 
   try {
     // Verify trip belongs to user

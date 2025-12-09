@@ -54,18 +54,22 @@ export const register = async (username, email, password) => {
 
 export const logout = async (navigation) => {
   try {
+    const token = await SecureStore.getItemAsync("token");
+
     const response = await fetch(`${API_URL}/logout`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
     const result = await response.json();
 
     if (response.ok) {
-      await SecureStore.deleteItemAsync("sessionId");
+      await SecureStore.deleteItemAsync("token");
       await SecureStore.deleteItemAsync("username");
+      await SecureStore.deleteItemAsync("userId");
       navigation.navigate("Start");
     }
   } catch (err) {

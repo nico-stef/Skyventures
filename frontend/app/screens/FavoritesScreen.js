@@ -13,7 +13,6 @@ import { tripsStyles } from "../styles/TripsStyles";
 import { getPlacePhotoUrl } from "../functions/googlePlacesFunction";
 import * as SecureStore from "expo-secure-store";
 import { getFavoritePlacesDetails } from "../functions/googlePlacesFunction";
-import axios from "axios";
 import Constants from 'expo-constants';
 
 const API_URL = Constants.expoConfig.extra.API_URL;
@@ -37,31 +36,36 @@ const FavoritesScreen = () => {
   }, []);
 
   const fetchFavorites = async () => {
-    if (userId) {
-      try {
-        const response = await axios.get(
-          `${API_URL}/favorites/${userId}`
-        );
-        const favoritePlaceIds = response.data.map((fav) => fav.placeId);
-        const favoritePlacesDetails = await getFavoritePlacesDetails(
-          favoritePlaceIds
-        );
-        setFavorites(favoritePlacesDetails);
-      } catch (err) {
-        console.log("Error fetching favorites: ", err);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
+    try {
+      const token = await SecureStore.getItemAsync("token");
+      const response = await fetch(
+        `${API_URL}/favorites`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        }
+      );
+      const data = await response.json();
+      const favoritePlaceIds = data.map((fav) => fav.placeId);
+      const favoritePlacesDetails = await getFavoritePlacesDetails(
+        favoritePlaceIds
+      );
+      setFavorites(favoritePlacesDetails);
+    } catch (err) {
+      console.log("Error fetching favorites: ", err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
-      if (userId) {
-        fetchFavorites();
-      }
-    }, [userId])
+      fetchFavorites();
+    }, [])
   );
 
   const onRefresh = () => {
@@ -71,11 +75,18 @@ const FavoritesScreen = () => {
 
   const handleRemoveFavorite = async (placeId) => {
     try {
+      const token = await SecureStore.getItemAsync("token");
       const data = {
-        userId: userId,
         placeId: placeId,
       };
-      await axios.delete(`${API_URL}/favorites/delete`, { data });
+      await fetch(`${API_URL}/favorites/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
       console.log("Removed from favorites");
       // Refresh the favorites list
       fetchFavorites();
@@ -134,7 +145,7 @@ const FavoritesScreen = () => {
                 <Text style={{ color: '#999' }}>No Image</Text>
               </View>
             )}
-            
+
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Text style={[tripsStyles.tripDestination, { flex: 1, marginBottom: 8, marginRight: 10 }]} numberOfLines={2}>
                 {item.name}

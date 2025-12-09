@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middleware/authMiddleware');
 const {
   getUserTrips,
   getTripById,
@@ -15,20 +16,23 @@ const {
   deleteExpense
 } = require('../controllers/tripsControllers');
 
-// Trip routes
+// authentication middleware to all routes
+router.use(verifyToken);
+
+// trip routes
 router.get('/', getUserTrips);
 router.get('/:tripId', getTripById);
 router.post('/', createTrip);
 router.put('/:tripId', updateTrip);
 router.delete('/:tripId', deleteTrip);
 
-// Itinerary routes
+// itinerary routes
 router.get('/:tripId/itinerary', getItineraryItems);
 router.post('/:tripId/itinerary', addItineraryItem);
 router.put('/:tripId/itinerary/:itemId', updateItineraryItem);
 router.delete('/:tripId/itinerary/:itemId', deleteItineraryItem);
 
-// Expense routes
+// expense routes
 router.get('/:tripId/expenses', getExpenses);
 router.post('/:tripId/expenses', addExpense);
 router.delete('/:tripId/expenses/:expenseId', deleteExpense);

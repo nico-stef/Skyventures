@@ -1,9 +1,9 @@
 const { v4: uuid } = require("uuid"); //import v4 method and rename to uuid
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const pool = require('../config/db')
 require("dotenv").config();
 const saltRounds = 10;
-
 
 const register = async (req, res) => {
     const { email, password, username } = req.body;
@@ -14,12 +14,10 @@ const register = async (req, res) => {
     }
 
     //check if user with the same email or username already exists
-    let [result] = await pool.query(`SELECT * FROM users WHERE email = ? OR username = ?`, [email, username]);
+    let [result] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
     if (result.length > 0) {
         if (result[0].email === email)
             res.status(500).json({ message: "There is already a user created with this email" });
-        else
-            res.status(500).json({ message: "There is already a user created with this username" });
         return;
     }
 
@@ -34,7 +32,6 @@ const register = async (req, res) => {
                 return;
             }
 
-            // Hashing successful, 'hash' contains the hashed password
             const user = {
                 userId: uuid(),
                 email,
@@ -69,7 +66,7 @@ const login = async (req, res) => {
     try {
         const [rows] = await pool.query( //rows = array of objects
             "SELECT * FROM users WHERE email = ?",
-            [email] // Parameter for the email
+            [email]
         );
 
         let userFound = null;
@@ -80,16 +77,24 @@ const login = async (req, res) => {
         }
 
         if (userFound) { //if user exists
-
             const validate = await bcrypt.compare(req.body.password, userFound.password);
 
             if (validate) {
-                req.session.userId = userFound.userId; // Set session identifier
+                // Generate JWT token
+                const token = jwt.sign(
+                    {
+                        userId: userFound.userId,
+                        email: userFound.email,
+                        username: userFound.username
+                    },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '7d' } // Token expires in 7 days
+                );
+
                 res.status(200).json({
-                    iduser: userFound.userId,
-                    username: userFound.username,
-                    sessionId: req.sessionID //sending back the session id
-                })//return an object with these atributes
+                    token: token,
+                    message: "Login successful"
+                });
             }
             else {
                 res.status(401).json({ message: "Incorrect password!" });//returns an object with property message
@@ -105,8 +110,9 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        req.session.destroy();
-        return res.status(200).json({ message: "Logout succesful" });
+        // With JWT, logout is handled client-side by removing the token
+        // Server doesn't need to do anything
+        return res.status(200).json({ message: "Logout successful. Please remove token from client." });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

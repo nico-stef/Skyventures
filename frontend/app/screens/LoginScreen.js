@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { login } from "../functions/authFunctions";
+import { decodeToken } from "../functions/authHelper";
 import { loginStyles } from "../styles/LoginStyles";
 import * as SecureStore from "expo-secure-store";
 
@@ -81,9 +82,16 @@ export default function LoginScreen(props) {
       if (result.error) {
         Alert.alert("Login Failed", result.error);
       } else {
-        await SecureStore.setItemAsync("sessionId", result.sessionId);
-        await SecureStore.setItemAsync("username", result.username);
-        await SecureStore.setItemAsync("userId", result.iduser);
+        // Store token
+        await SecureStore.setItemAsync("token", result.token);
+
+        // Decode token to get user info
+        const decoded = decodeToken(result.token);
+        if (decoded) {
+          await SecureStore.setItemAsync("username", decoded.username);
+          await SecureStore.setItemAsync("userId", decoded.userId);
+        }
+
         navigation.navigate("Home");
       }
     } catch (error) {

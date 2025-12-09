@@ -24,10 +24,7 @@ const tripsSchemaCheck = async () => {
       placeName VARCHAR(255) NOT NULL,
       placeId VARCHAR(255),
       placeAddress TEXT,
-      placePhoto TEXT,
-      placeRating DECIMAL(2, 1),
       notes TEXT,
-      orderIndex INT DEFAULT 0,
       createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (tripId) REFERENCES trips(tripId) ON DELETE CASCADE
     )
@@ -39,7 +36,7 @@ const tripsSchemaCheck = async () => {
       tripId INT NOT NULL,
       category VARCHAR(50) NOT NULL,
       amount DECIMAL(10, 2) NOT NULL,
-      description VARCHAR(255),
+      description TEXT,
       expenseDate DATE NOT NULL,
       createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (tripId) REFERENCES trips(tripId) ON DELETE CASCADE

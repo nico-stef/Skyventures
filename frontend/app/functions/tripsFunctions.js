@@ -1,14 +1,17 @@
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 
 const API_URL = Constants.expoConfig.extra.API_URL;
 
 // Trip CRUD operations
-export const getUserTrips = async (userId) => {
+export const getUserTrips = async () => {
   try {
-    const response = await fetch(`${API_URL}/trips?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
@@ -24,12 +27,14 @@ export const getUserTrips = async (userId) => {
   }
 };
 
-export const getTripById = async (tripId, userId) => {
+export const getTripById = async (tripId) => {
   try {
-    const response = await fetch(`${API_URL}/trips/${tripId}?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips/${tripId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
@@ -45,10 +50,10 @@ export const getTripById = async (tripId, userId) => {
   }
 };
 
-export const createTrip = async (userId, destination, startDate, endDate, budget, description) => {
+export const createTrip = async (destination, startDate, endDate, budget, description) => {
   try {
+    const token = await SecureStore.getItemAsync("token");
     const body = {
-      userId,
       destination,
       startDate,
       endDate,
@@ -60,6 +65,7 @@ export const createTrip = async (userId, destination, startDate, endDate, budget
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(body),
     });
@@ -76,10 +82,10 @@ export const createTrip = async (userId, destination, startDate, endDate, budget
   }
 };
 
-export const updateTrip = async (tripId, userId, destination, startDate, endDate, budget, description) => {
+export const updateTrip = async (tripId, destination, startDate, endDate, budget, description) => {
   try {
+    const token = await SecureStore.getItemAsync("token");
     const body = {
-      userId,
       destination,
       startDate,
       endDate,
@@ -91,6 +97,7 @@ export const updateTrip = async (tripId, userId, destination, startDate, endDate
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(body),
     });
@@ -107,12 +114,14 @@ export const updateTrip = async (tripId, userId, destination, startDate, endDate
   }
 };
 
-export const deleteTrip = async (tripId, userId) => {
+export const deleteTrip = async (tripId) => {
   try {
-    const response = await fetch(`${API_URL}/trips/${tripId}?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips/${tripId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
@@ -129,12 +138,14 @@ export const deleteTrip = async (tripId, userId) => {
 };
 
 // Itinerary operations
-export const getItineraryItems = async (tripId, userId) => {
+export const getItineraryItems = async (tripId) => {
   try {
-    const response = await fetch(`${API_URL}/trips/${tripId}/itinerary?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips/${tripId}/itinerary`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
@@ -150,27 +161,25 @@ export const getItineraryItems = async (tripId, userId) => {
   }
 };
 
-export const addItineraryItem = async (tripId, userId, itemData) => {
+export const addItineraryItem = async (tripId, itemData) => {
   try {
     const body = {
-      userId,
       dayDate: itemData.dayDate,
       startTime: itemData.startTime || null,
       placeName: itemData.placeName,
       placeId: itemData.placeId || null,
       placeAddress: itemData.placeAddress || null,
-      placePhoto: itemData.placePhoto || null,
-      placeRating: itemData.placeRating || null,
-      notes: itemData.notes || '',
-      orderIndex: itemData.orderIndex || 0
+      notes: itemData.notes || ''
     };
 
     console.log('Sending to backend:', body);
 
+    const token = await SecureStore.getItemAsync("token");
     const response = await fetch(`${API_URL}/trips/${tripId}/itinerary`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(body),
     });
@@ -187,20 +196,23 @@ export const addItineraryItem = async (tripId, userId, itemData) => {
   }
 };
 
-export const updateItineraryItem = async (tripId, itemId, userId, itemData) => {
+export const updateItineraryItem = async (tripId, itemId, itemData) => {
   try {
+    const token = await SecureStore.getItemAsync("token");
     const body = {
-      userId,
       dayDate: itemData.dayDate,
+      startTime: itemData.startTime,
       placeName: itemData.placeName,
-      notes: itemData.notes,
-      orderIndex: itemData.orderIndex
+      placeId: itemData.placeId,
+      placeAddress: itemData.placeAddress,
+      notes: itemData.notes
     };
 
     const response = await fetch(`${API_URL}/trips/${tripId}/itinerary/${itemId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(body),
     });
@@ -217,12 +229,14 @@ export const updateItineraryItem = async (tripId, itemId, userId, itemData) => {
   }
 };
 
-export const deleteItineraryItem = async (tripId, itemId, userId) => {
+export const deleteItineraryItem = async (tripId, itemId) => {
   try {
-    const response = await fetch(`${API_URL}/trips/${tripId}/itinerary/${itemId}?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips/${tripId}/itinerary/${itemId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
@@ -239,12 +253,14 @@ export const deleteItineraryItem = async (tripId, itemId, userId) => {
 };
 
 // Expense operations
-export const getExpenses = async (tripId, userId) => {
+export const getExpenses = async (tripId) => {
   try {
-    const response = await fetch(`${API_URL}/trips/${tripId}/expenses?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips/${tripId}/expenses`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 
@@ -260,10 +276,10 @@ export const getExpenses = async (tripId, userId) => {
   }
 };
 
-export const addExpense = async (tripId, userId, expenseData) => {
+export const addExpense = async (tripId, expenseData) => {
   try {
+    const token = await SecureStore.getItemAsync("token");
     const body = {
-      userId,
       category: expenseData.category,
       amount: expenseData.amount,
       description: expenseData.description || '',
@@ -274,6 +290,7 @@ export const addExpense = async (tripId, userId, expenseData) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(body),
     });
@@ -290,12 +307,14 @@ export const addExpense = async (tripId, userId, expenseData) => {
   }
 };
 
-export const deleteExpense = async (tripId, expenseId, userId) => {
+export const deleteExpense = async (tripId, expenseId) => {
   try {
-    const response = await fetch(`${API_URL}/trips/${tripId}/expenses/${expenseId}?userId=${userId}`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await fetch(`${API_URL}/trips/${tripId}/expenses/${expenseId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     });
 

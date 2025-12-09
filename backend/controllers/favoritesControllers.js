@@ -1,9 +1,9 @@
 const pool = require('../config/db');
-const { favoritesSchema } = require('../schemas/favoritesSchema');
 require("dotenv").config();
 
 const addToFavorites = async (req, res) => {
-    const { userId, placeId } = req.body;
+    const userId = req.user.userId; // Get from JWT token
+    const { placeId } = req.body;
 
     try {
         const [rows] = await pool.query( //rows = array of objects
@@ -29,7 +29,7 @@ const addToFavorites = async (req, res) => {
 }
 
 const getFavorites = async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.user.userId; // Get from JWT token
 
     try {
         const [favorites] = await pool.query( //rows = array of objects
@@ -44,7 +44,8 @@ const getFavorites = async (req, res) => {
 }
 
 const deleteFavorite = async (req, res) => {
-    const { userId, placeId } = req.body;
+    const userId = req.user.userId; // Get from JWT token
+    const { placeId } = req.body;
 
     try {
         const [rows] = await pool.query(
@@ -67,24 +68,8 @@ const deleteFavorite = async (req, res) => {
     }
 }
 
-const checkFavorite = async (req, res) => {
-    const { userId, placeId } = req.params;
-
-    try {
-        const [rows] = await pool.query(
-            'SELECT * FROM favorites WHERE userId = ? AND placeId = ?',
-            [userId, placeId]
-        );
-
-        res.status(200).json({ isFavorite: rows.length > 0 });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-
 module.exports = {
     addToFavorites,
     getFavorites,
-    deleteFavorite,
-    checkFavorite
+    deleteFavorite
 }

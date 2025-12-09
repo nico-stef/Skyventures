@@ -71,7 +71,7 @@ export default function AddExpenseModal({
     };
 
     try {
-      const result = await addExpense(tripId, userId, expenseData);
+      const result = await addExpense(tripId, expenseData);
       if (result.error) {
         Alert.alert("Error", result.error);
       } else {

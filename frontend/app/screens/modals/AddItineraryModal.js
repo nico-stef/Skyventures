@@ -176,17 +176,14 @@ export default function AddItineraryModal({
       placeName: placeName.trim(),
       placeId: selectedPlace?.placeId || placeData?.placeId || null,
       placeAddress: selectedPlace?.placeAddress || placeData?.placeAddress || null,
-      placePhoto: selectedPlace?.placePhoto || placeData?.placePhoto || null,
-      placeRating: selectedPlace?.placeRating || placeData?.placeRating || null,
       notes: notes.trim(),
-      orderIndex: 0,
     };
 
     console.log('===== itemData CREATED =====');
     console.log('itemData:', JSON.stringify(itemData, null, 2));
 
     try {
-      const result = await addItineraryItem(tripId, userId, itemData);
+      const result = await addItineraryItem(tripId, itemData);
       console.log('Backend response:', result);
       if (result.error) {
         Alert.alert("Error", result.error);

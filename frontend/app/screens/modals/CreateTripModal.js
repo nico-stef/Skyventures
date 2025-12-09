@@ -66,7 +66,6 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
 
     try {
       const result = await createTrip(
-        userId,
         destination.trim(),
         formatDateDisplay(startDate),
         formatDateDisplay(endDate),
