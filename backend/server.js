@@ -13,6 +13,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", require("./routes/authRoutes"));
 app.use("/favorites", require("./routes/favoritesRoutes"));
 app.use("/trips", require("./routes/tripsRoutes"));
+app.use("/weather", require("./routes/weatherRoutes"));
+app.use("/google-places", require("./routes/googlePlacesRoutes"));
 
 // Global Error Handler Middleware function
 app.use((err, req, res, next) => {

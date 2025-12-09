@@ -1,21 +1,27 @@
 import axios from "axios";
 import Constants from 'expo-constants';
+import * as SecureStore from "expo-secure-store";
 
-const API_KEY = Constants.expoConfig.extra.WEATHER_API;
+const API_URL = Constants.expoConfig.extra.API_URL;
 
 export const getCurrentWeather = async (latitude, longitude) => {
   try {
+    const token = await SecureStore.getItemAsync("token");
     const response = await axios.get(
-      "https://api.weatherapi.com/v1/current.json",
+      `${API_URL}/weather/current`,
       {
         params: {
-          key: API_KEY, // Your WeatherAPI.com API Key
-          q: `${latitude},${longitude}`, // Format: 'latitude,longitude'
+          latitude,
+          longitude,
         },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
     );
     return response.data;
   } catch (error) {
+    console.error("Error fetching weather:", error);
     return error;
   }
 };

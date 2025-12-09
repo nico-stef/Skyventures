@@ -1,19 +1,22 @@
 // GooglePlacesService.js
 import axios from "axios";
 import Constants from 'expo-constants';
+import * as SecureStore from "expo-secure-store";
 
-const API_KEY = Constants.expoConfig.extra.GOOGLE_PLACES_API;
-const BASE_URL = "https://maps.googleapis.com/maps/api/place";
+const API_URL = Constants.expoConfig.extra.API_URL;
 
 export const getNearbyPlaces = async (latitude, longitude, type) => {
   try {
-    const response = await axios.get(`${BASE_URL}/nearbysearch/json`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await axios.get(`${API_URL}/google-places/nearby`, {
       params: {
-        location: `${latitude},${longitude}`,
-        radius: 2000,
-        type: type, // Uses the type passed from `NearbyPlaces`
-        key: API_KEY,
+        latitude,
+        longitude,
+        type,
       },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
     return response.data;
   } catch (error) {
@@ -23,22 +26,23 @@ export const getNearbyPlaces = async (latitude, longitude, type) => {
 };
 
 export const getPlacePhotoUrl = (
-  photoReference,
-  maxWidth = 24,
-  maxHeight = 24
+  photoReference, //code that identifies the photo. its returned in the place details response. its not the url
+  maxWidth = 400,
+  maxHeight = 400
 ) => {
-  return `${BASE_URL}/photo?maxwidth=${maxWidth}&maxheight=${maxHeight}&photoreference=${photoReference}&key=${API_KEY}`;
+  // Returns the backend URL that will proxy the request
+  return `${API_URL}/google-places/photo?photoReference=${photoReference}&maxWidth=${maxWidth}&maxHeight=${maxHeight}`;
 };
 
 export const getPlaceDetails = async (placeId) => {
   try {
-    const response = await axios.get(`${BASE_URL}/details/json`, {
-      params: {
-        place_id: placeId,
-        key: API_KEY,
-      },
+    const token = await SecureStore.getItemAsync("token");
+    const response = await axios.get(`${API_URL}/google-places/details/${placeId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
-    return response.data.result; // Returns the 'result' object with detailed information
+    return response.data; // Returns the 'result' object with detailed information
   } catch (error) {
     console.error("Error fetching place details:", error);
     throw error;
@@ -100,18 +104,20 @@ export const getFavoritePlacesDetails = async (placeIds) => {
 
 export const searchPlaces = async (query, location = "") => {
   try {
-    const response = await axios.get(`${BASE_URL}/textsearch/json`, {
+    const token = await SecureStore.getItemAsync("token");
+    const response = await axios.get(`${API_URL}/google-places/search`, {
       params: {
-        query: location ? `${query} in ${location}` : query,
-        key: API_KEY,
+        query,
+        location,
       },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
 
     if (response.data.results) {
       return response.data.results.map(place => {
-        const photoUrl = place.photos?.length
-          ? getPlacePhotoUrl(place.photos[0].photo_reference, 400, 400)
-          : null;
+        const photoUrl = place.photos?.length ? getPlacePhotoUrl(place.photos[0].photo_reference, 400, 400) : null;
 
         return {
           place_id: place.place_id,
