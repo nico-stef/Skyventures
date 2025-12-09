@@ -10,6 +10,8 @@ import {
   TextInput,
   Keyboard,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -88,23 +90,27 @@ export default function RegisterScreen(props) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <LinearGradient
-        start={{ x: 0, y: 1 }}
-        end={{ x: 1, y: 1 }}
-        colors={["#8B5CF6", "#b794f6"]}
-        style={registerStyles.background}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
       >
+        <LinearGradient
+          start={{ x: 0, y: 1 }}
+          end={{ x: 1, y: 1 }}
+          colors={["#8B5CF6", "#b794f6"]}
+          style={registerStyles.background}
+        >
         <SafeAreaView style={registerStyles.logoContainer}>
-          <Animated.View style={moveDown}>
-            <Image
-              source={require("../assets/skyventures-logo.png")}
-              style={registerStyles.logo}
-            />
-            <Text style={registerStyles.createAccountText}>Create Account</Text>
-          </Animated.View>
-        </SafeAreaView>
+              <Animated.View style={moveDown}>
+                <Image
+                  source={require("../assets/skyventures-logo.png")}
+                  style={registerStyles.logo}
+                />
+                <Text style={registerStyles.createAccountText}>Create Account</Text>
+              </Animated.View>
+            </SafeAreaView>
 
-        <Animated.View style={[opacityClearToVisible, registerStyles.registerContainer]}>
+            <Animated.View style={[opacityClearToVisible, registerStyles.registerContainer]}>
           <View style={registerStyles.credentialsContainer}>
             <TextInput
               inputMode="text"
@@ -157,6 +163,7 @@ export default function RegisterScreen(props) {
           </TouchableOpacity>
         </Animated.View>
       </LinearGradient>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 }

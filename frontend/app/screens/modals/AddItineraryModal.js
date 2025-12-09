@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,10 @@ import {
   Alert,
   Platform,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { tripsStyles } from "../../styles/TripsStyles";
 import { addItineraryItem } from "../../functions/tripsFunctions";
 import { searchPlaces } from "../../functions/googlePlacesFunction";
@@ -24,11 +26,10 @@ export default function AddItineraryModal({
   trip,
   placeData = null,
 }) {
+  const scrollViewRef = useRef(null);
   const [placeName, setPlaceName] = useState("");
   const [dayDate, setDayDate] = useState(new Date());
   const [startTime, setStartTime] = useState(new Date());
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [notes, setNotes] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -123,20 +124,6 @@ export default function AddItineraryModal({
     setSelectedPlace(null);
     setSearchQuery("");
     setSearchResults([]);
-  };
-
-  const handleTimeChange = (event, selectedTime) => {
-    setShowTimePicker(Platform.OS === 'ios');
-    if (selectedTime) {
-      setStartTime(selectedTime);
-    }
-  };
-
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setDayDate(selectedDate);
-    }
   };
 
   const formatTime = (date) => {
@@ -238,9 +225,15 @@ export default function AddItineraryModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={tripsStyles.modalOverlay}>
-        <View style={tripsStyles.modalContent}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={tripsStyles.modalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            <View style={tripsStyles.modalContent}>
+              <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Text style={tripsStyles.modalTitle}>Add Activity</Text>
 
             {/* Place Name Section */}
@@ -310,44 +303,19 @@ export default function AddItineraryModal({
 
             {/* Time Picker */}
             <Text style={tripsStyles.inputLabel}>Start Time *</Text>
-            <TouchableOpacity
-              style={tripsStyles.timePickerButton}
-              onPress={() => setShowTimePicker(true)}
-            >
-              <Text style={tripsStyles.timePickerText}>
-                {formatTime(startTime)}
-              </Text>
-            </TouchableOpacity>
-
-            {showTimePicker && (
-              <DateTimePicker
-                value={startTime}
-                mode="time"
-                is24Hour={false}
-                display="default"
-                onChange={handleTimeChange}
-              />
-            )}
+            <TextInput
+              style={tripsStyles.input}
+              value={formatTime(startTime)}
+              editable={false}
+            />
 
             {/* Day Picker */}
             <Text style={tripsStyles.inputLabel}>Select Day *</Text>
-            <TouchableOpacity
-              style={tripsStyles.timePickerButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={tripsStyles.timePickerText}>
-                {formatDateDisplay(dayDate)}
-              </Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={dayDate}
-                mode="date"
-                display="default"
-                onChange={handleDateChange}
-              />
-            )}
+            <TextInput
+              style={tripsStyles.input}
+              value={formatDateDisplay(dayDate)}
+              editable={false}
+            />
 
             <Text style={tripsStyles.inputLabel}>Notes</Text>
             <TextInput
@@ -357,6 +325,11 @@ export default function AddItineraryModal({
               onChangeText={setNotes}
               multiline
               numberOfLines={4}
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+              }}
             />
 
             <View style={tripsStyles.modalButtons}>
@@ -377,9 +350,11 @@ export default function AddItineraryModal({
                 <Text style={tripsStyles.modalButtonText}>Add</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }

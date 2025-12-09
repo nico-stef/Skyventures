@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,20 +8,21 @@ import {
   ScrollView,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { tripsStyles } from "../../styles/TripsStyles";
 import { createTrip } from "../../functions/tripsFunctions";
 
 export default function CreateTripModal({ visible, onClose, onSuccess, userId }) {
   const today = new Date();
+  const scrollViewRef = useRef(null);
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const [budget, setBudget] = useState("");
   const [description, setDescription] = useState("");
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const resetForm = () => {
     const today = new Date();
@@ -30,20 +31,6 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
     setEndDate(today);
     setBudget("");
     setDescription("");
-  };
-
-  const handleStartDateChange = (event, selectedDate) => {
-    setShowStartDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setStartDate(selectedDate);
-    }
-  };
-
-  const handleEndDateChange = (event, selectedDate) => {
-    setShowEndDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setEndDate(selectedDate);
-    }
   };
 
   const formatDateDisplay = (date) => {
@@ -91,9 +78,15 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={tripsStyles.modalOverlay}>
-        <View style={tripsStyles.modalContent}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={tripsStyles.modalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            <View style={tripsStyles.modalContent}>
+              <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Text style={tripsStyles.modalTitle}>Create New Trip</Text>
 
             <Text style={tripsStyles.inputLabel}>Destination *</Text>
@@ -105,42 +98,18 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
             />
 
             <Text style={tripsStyles.inputLabel}>Start Date *</Text>
-            <TouchableOpacity
-              style={tripsStyles.timePickerButton}
-              onPress={() => setShowStartDatePicker(true)}
-            >
-              <Text style={tripsStyles.timePickerText}>
-                {formatDateDisplay(startDate)}
-              </Text>
-            </TouchableOpacity>
-
-            {showStartDatePicker && (
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display="default"
-                onChange={handleStartDateChange}
-              />
-            )}
+            <TextInput
+              style={tripsStyles.input}
+              value={formatDateDisplay(startDate)}
+              editable={false}
+            />
 
             <Text style={tripsStyles.inputLabel}>End Date *</Text>
-            <TouchableOpacity
-              style={tripsStyles.timePickerButton}
-              onPress={() => setShowEndDatePicker(true)}
-            >
-              <Text style={tripsStyles.timePickerText}>
-                {formatDateDisplay(endDate)}
-              </Text>
-            </TouchableOpacity>
-
-            {showEndDatePicker && (
-              <DateTimePicker
-                value={endDate}
-                mode="date"
-                display="default"
-                onChange={handleEndDateChange}
-              />
-            )}
+            <TextInput
+              style={tripsStyles.input}
+              value={formatDateDisplay(endDate)}
+              editable={false}
+            />
 
             <Text style={tripsStyles.inputLabel}>Budget</Text>
             <TextInput
@@ -159,6 +128,11 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
               onChangeText={setDescription}
               multiline
               numberOfLines={4}
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+              }}
             />
 
             <View style={tripsStyles.modalButtons}>
@@ -179,9 +153,11 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
                 <Text style={tripsStyles.modalButtonText}>Create</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }

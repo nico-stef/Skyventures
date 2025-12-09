@@ -10,6 +10,8 @@ import {
   TextInput,
   Keyboard,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -101,12 +103,16 @@ export default function LoginScreen(props) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <LinearGradient
-        start={{ x: 0, y: 1 }}
-        end={{ x: 1, y: 1 }}
-        colors={["#8B5CF6", "#b794f6"]}
-        style={loginStyles.background}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
       >
+        <LinearGradient
+          start={{ x: 0, y: 1 }}
+          end={{ x: 1, y: 1 }}
+          colors={["#8B5CF6", "#b794f6"]}
+          style={loginStyles.background}
+        >
         <SafeAreaView style={loginStyles.logoContainer}>
           <Animated.View style={moveDown}>
             <Image
@@ -159,6 +165,7 @@ export default function LoginScreen(props) {
           </TouchableOpacity>
         </Animated.View>
       </LinearGradient>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 }

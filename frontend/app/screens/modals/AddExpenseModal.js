@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,11 @@ import {
   ScrollView,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { tripsStyles } from "../../styles/TripsStyles";
 import { addExpense } from "../../functions/tripsFunctions";
 
@@ -30,11 +32,11 @@ export default function AddExpenseModal({
   tripId,
   userId,
 }) {
+  const scrollViewRef = useRef(null);
   const [category, setCategory] = useState("Food & Dining");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const resetForm = () => {
     setCategory("Food & Dining");
@@ -48,13 +50,6 @@ export default function AddExpenseModal({
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
-
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setExpenseDate(selectedDate);
-    }
   };
 
   const handleAdd = async () => {
@@ -90,9 +85,15 @@ export default function AddExpenseModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={tripsStyles.modalOverlay}>
-        <View style={tripsStyles.modalContent}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={tripsStyles.modalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            <View style={tripsStyles.modalContent}>
+              <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <Text style={tripsStyles.modalTitle}>Add Expense</Text>
 
             <Text style={tripsStyles.inputLabel}>Category *</Text>
@@ -121,21 +122,11 @@ export default function AddExpenseModal({
             </View>
 
             <Text style={tripsStyles.inputLabel}>Date *</Text>
-            <TouchableOpacity
+            <TextInput
               style={tripsStyles.input}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={{ fontSize: 16 }}>{formatDateDisplay(expenseDate)}</Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={expenseDate}
-                mode="date"
-                display="default"
-                onChange={handleDateChange}
-              />
-            )}
+              value={formatDateDisplay(expenseDate)}
+              editable={false}
+            />
 
             <Text style={tripsStyles.inputLabel}>Description</Text>
             <TextInput
@@ -143,6 +134,11 @@ export default function AddExpenseModal({
               placeholder="What was this for?"
               value={description}
               onChangeText={setDescription}
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+              }}
             />
 
             <View style={tripsStyles.modalButtons}>
@@ -163,9 +159,11 @@ export default function AddExpenseModal({
                 <Text style={tripsStyles.modalButtonText}>Add</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
