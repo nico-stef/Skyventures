@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
 } from "react-native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { tripsStyles } from "../../styles/TripsStyles";
 import { updateTrip } from "../../functions/tripsFunctions";
 
@@ -18,16 +19,48 @@ export default function EditTripModal({ visible, onClose, onSuccess, trip, userI
   const [endDate, setEndDate] = useState(new Date());
   const [budget, setBudget] = useState("");
   const [description, setDescription] = useState("");
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   useEffect(() => {
     if (trip && visible) {
       setDestination(trip.destination || "");
-      setStartDate(new Date(trip.startDate));
-      setEndDate(new Date(trip.endDate));
+
+      // Parse start date
+      const startParts = trip.startDate.split('T')[0].split('-');
+      const parsedStartDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+      setStartDate(parsedStartDate);
+
+      // Parse end date
+      const endParts = trip.endDate.split('T')[0].split('-');
+      const parsedEndDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+      setEndDate(parsedEndDate);
+
       setBudget(trip.budget ? trip.budget.toString() : "");
       setDescription(trip.description || "");
     }
   }, [trip, visible]);
+
+  const handleStartDateChange = (event, selectedDate) => {
+    setShowStartDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setStartDate(selectedDate);
+    }
+  };
+
+  const handleEndDateChange = (event, selectedDate) => {
+    setShowEndDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setEndDate(selectedDate);
+    }
+  };
+
+  const formatDateDisplay = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const handleUpdate = async () => {
     if (!destination.trim()) {
@@ -45,8 +78,8 @@ export default function EditTripModal({ visible, onClose, onSuccess, trip, userI
         trip.tripId,
         userId,
         destination.trim(),
-        startDate.toISOString().split('T')[0],
-        endDate.toISOString().split('T')[0],
+        formatDateDisplay(startDate),
+        formatDateDisplay(endDate),
         parseFloat(budget) || 0,
         description.trim()
       );
@@ -82,20 +115,42 @@ export default function EditTripModal({ visible, onClose, onSuccess, trip, userI
             />
 
             <Text style={tripsStyles.inputLabel}>Start Date *</Text>
-            <TextInput
-              style={tripsStyles.input}
-              placeholder="YYYY-MM-DD"
-              value={startDate.toISOString().split('T')[0]}
-              editable={false}
-            />
+            <TouchableOpacity
+              style={tripsStyles.timePickerButton}
+              onPress={() => setShowStartDatePicker(true)}
+            >
+              <Text style={tripsStyles.timePickerText}>
+                {formatDateDisplay(startDate)}
+              </Text>
+            </TouchableOpacity>
+
+            {showStartDatePicker && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="default"
+                onChange={handleStartDateChange}
+              />
+            )}
 
             <Text style={tripsStyles.inputLabel}>End Date *</Text>
-            <TextInput
-              style={tripsStyles.input}
-              placeholder="YYYY-MM-DD"
-              value={endDate.toISOString().split('T')[0]}
-              editable={false}
-            />
+            <TouchableOpacity
+              style={tripsStyles.timePickerButton}
+              onPress={() => setShowEndDatePicker(true)}
+            >
+              <Text style={tripsStyles.timePickerText}>
+                {formatDateDisplay(endDate)}
+              </Text>
+            </TouchableOpacity>
+
+            {showEndDatePicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="default"
+                onChange={handleEndDateChange}
+              />
+            )}
 
             <Text style={tripsStyles.inputLabel}>Budget</Text>
             <TextInput

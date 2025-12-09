@@ -11,17 +11,14 @@ const getUserTrips = async (req, res) => {
   try {
     const [trips] = await pool.query(
       `SELECT t.*, 
-        COALESCE(SUM(e.amount), 0) as totalSpent,
-        COUNT(DISTINCT i.itemId) as itineraryCount
+        COALESCE((SELECT SUM(e.amount) FROM expenses e WHERE e.tripId = t.tripId), 0) as totalSpent,
+        COALESCE((SELECT COUNT(*) FROM itinerary_items i WHERE i.tripId = t.tripId), 0) as itineraryCount
        FROM trips t
-       LEFT JOIN expenses e ON t.tripId = e.tripId
-       LEFT JOIN itinerary_items i ON t.tripId = i.tripId
        WHERE t.userId = ?
-       GROUP BY t.tripId
-       ORDER BY t.startDate DESC`,
+       ORDER BY t.startDate ASC`,
       [userId]
     );
-    
+
     res.status(200).json({ trips });
   } catch (err) {
     console.error("Error fetching trips:", err);
@@ -80,9 +77,9 @@ const createTrip = async (req, res) => {
       [result.insertId]
     );
 
-    res.status(201).json({ 
-      message: "Trip created successfully", 
-      trip: newTrip[0] 
+    res.status(201).json({
+      message: "Trip created successfully",
+      trip: newTrip[0]
     });
   } catch (err) {
     console.error("Error creating trip:", err);
@@ -116,7 +113,7 @@ const updateTrip = async (req, res) => {
       [tripId]
     );
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Trip updated successfully",
       trip: updatedTrip[0]
     });
@@ -189,17 +186,26 @@ const getItineraryItems = async (req, res) => {
 // Add itinerary item
 const addItineraryItem = async (req, res) => {
   const { tripId } = req.params;
-  const { 
-    userId, 
-    dayDate, 
-    placeName, 
-    placeId, 
-    placeAddress, 
-    placePhoto, 
-    placeRating, 
-    notes, 
-    orderIndex 
+  const {
+    userId,
+    dayDate,
+    startTime,
+    placeName,
+    placeId,
+    placeAddress,
+    placePhoto,
+    placeRating,
+    notes,
+    orderIndex
   } = req.body;
+
+  console.log('Received itinerary item data:');
+  console.log('tripId:', tripId);
+  console.log('userId:', userId);
+  console.log('dayDate:', dayDate);
+  console.log('startTime:', startTime);
+  console.log('placeName:', placeName);
+  console.log('Full body:', req.body);
 
   if (!userId || !dayDate || !placeName) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -216,11 +222,13 @@ const addItineraryItem = async (req, res) => {
       return res.status(404).json({ error: "Trip not found" });
     }
 
+    console.log('Inserting into database with startTime:', startTime);
+
     const [result] = await pool.query(
       `INSERT INTO itinerary_items 
-       (tripId, dayDate, placeName, placeId, placeAddress, placePhoto, placeRating, notes, orderIndex) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [tripId, dayDate, placeName, placeId, placeAddress, placePhoto, placeRating, notes, orderIndex || 0]
+       (tripId, dayDate, startTime, placeName, placeId, placeAddress, placePhoto, placeRating, notes, orderIndex) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [tripId, dayDate, startTime, placeName, placeId, placeAddress, placePhoto, placeRating, notes, orderIndex || 0]
     );
 
     const [newItem] = await pool.query(
@@ -228,7 +236,9 @@ const addItineraryItem = async (req, res) => {
       [result.insertId]
     );
 
-    res.status(201).json({ 
+    console.log('Created item:', newItem[0]);
+
+    res.status(201).json({
       message: "Itinerary item added successfully",
       item: newItem[0]
     });
@@ -274,7 +284,7 @@ const updateItineraryItem = async (req, res) => {
       [itemId]
     );
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Itinerary item updated successfully",
       item: updatedItem[0]
     });
@@ -394,7 +404,7 @@ const addExpense = async (req, res) => {
       [result.insertId]
     );
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: "Expense added successfully",
       expense: newExpense[0]
     });

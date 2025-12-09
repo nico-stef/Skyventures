@@ -20,6 +20,7 @@ const tripsSchemaCheck = async () => {
       itemId INT AUTO_INCREMENT PRIMARY KEY,
       tripId INT NOT NULL,
       dayDate DATE NOT NULL,
+      startTime TIME,
       placeName VARCHAR(255) NOT NULL,
       placeId VARCHAR(255),
       placeAddress TEXT,
@@ -48,10 +49,10 @@ const tripsSchemaCheck = async () => {
   try {
     await pool.execute(tripsTableQuery);
     console.log("Trips schema checked");
-    
+
     await pool.execute(itineraryItemsTableQuery);
     console.log("Itinerary items schema checked");
-    
+
     await pool.execute(expensesTableQuery);
     console.log("Expenses schema checked");
   } catch (err) {

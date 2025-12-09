@@ -119,7 +119,7 @@ export const tripsStyles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-  
+
   // Trip Detail Screen styles
   detailHeader: {
     backgroundColor: '#8B5CF6',
@@ -174,7 +174,7 @@ export const tripsStyles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
-  
+
   // Overview Tab styles
   overviewCard: {
     backgroundColor: 'white',
@@ -231,7 +231,7 @@ export const tripsStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
   // Itinerary Tab styles
   daySection: {
     marginBottom: 25,
@@ -289,7 +289,7 @@ export const tripsStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
   // Expenses Tab styles
   expenseSummaryCard: {
     backgroundColor: 'white',
@@ -373,7 +373,7 @@ export const tripsStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
   // Modal styles
   modalOverlay: {
     flex: 1,
@@ -446,7 +446,7 @@ export const tripsStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
+
   // Add to Trip Modal
   tripSelectItem: {
     padding: 15,
@@ -472,5 +472,54 @@ export const tripsStyles = StyleSheet.create({
   daySelectText: {
     fontSize: 14,
     color: '#333',
+  },
+
+  // Search results styles
+  searchResultsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginBottom: 10,
+    maxHeight: 200,
+  },
+  searchResultItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  searchResultName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  searchResultAddress: {
+    fontSize: 12,
+    color: '#666',
+  },
+  manualEntryButton: {
+    alignItems: 'center',
+    padding: 10,
+    marginBottom: 10,
+  },
+  manualEntryText: {
+    color: '#886ae6',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  timePickerButton: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignItems: 'center',
+  },
+  timePickerText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
   },
 });

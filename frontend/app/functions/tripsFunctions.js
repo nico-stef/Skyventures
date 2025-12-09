@@ -47,13 +47,13 @@ export const getTripById = async (tripId, userId) => {
 
 export const createTrip = async (userId, destination, startDate, endDate, budget, description) => {
   try {
-    const body = { 
-      userId, 
-      destination, 
-      startDate, 
-      endDate, 
-      budget: budget || 0, 
-      description: description || '' 
+    const body = {
+      userId,
+      destination,
+      startDate,
+      endDate,
+      budget: budget || 0,
+      description: description || ''
     };
 
     const response = await fetch(`${API_URL}/trips`, {
@@ -78,13 +78,13 @@ export const createTrip = async (userId, destination, startDate, endDate, budget
 
 export const updateTrip = async (tripId, userId, destination, startDate, endDate, budget, description) => {
   try {
-    const body = { 
-      userId, 
-      destination, 
-      startDate, 
-      endDate, 
-      budget, 
-      description 
+    const body = {
+      userId,
+      destination,
+      startDate,
+      endDate,
+      budget,
+      description
     };
 
     const response = await fetch(`${API_URL}/trips/${tripId}`, {
@@ -152,9 +152,10 @@ export const getItineraryItems = async (tripId, userId) => {
 
 export const addItineraryItem = async (tripId, userId, itemData) => {
   try {
-    const body = { 
+    const body = {
       userId,
       dayDate: itemData.dayDate,
+      startTime: itemData.startTime || null,
       placeName: itemData.placeName,
       placeId: itemData.placeId || null,
       placeAddress: itemData.placeAddress || null,
@@ -163,6 +164,8 @@ export const addItineraryItem = async (tripId, userId, itemData) => {
       notes: itemData.notes || '',
       orderIndex: itemData.orderIndex || 0
     };
+
+    console.log('Sending to backend:', body);
 
     const response = await fetch(`${API_URL}/trips/${tripId}/itinerary`, {
       method: "POST",
@@ -186,7 +189,7 @@ export const addItineraryItem = async (tripId, userId, itemData) => {
 
 export const updateItineraryItem = async (tripId, itemId, userId, itemData) => {
   try {
-    const body = { 
+    const body = {
       userId,
       dayDate: itemData.dayDate,
       placeName: itemData.placeName,
@@ -259,7 +262,7 @@ export const getExpenses = async (tripId, userId) => {
 
 export const addExpense = async (tripId, userId, expenseData) => {
   try {
-    const body = { 
+    const body = {
       userId,
       category: expenseData.category,
       amount: expenseData.amount,

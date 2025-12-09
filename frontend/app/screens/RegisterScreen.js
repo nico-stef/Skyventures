@@ -115,7 +115,7 @@ export default function RegisterScreen(props) {
               textContentType="oneTimeCode"
               onChangeText={(username) => setForm({ ...form, username })}
               value={form.username}
-              placeholder="Username"
+              placeholder="Name"
               placeholderTextColor="#999"
             />
             <TextInput

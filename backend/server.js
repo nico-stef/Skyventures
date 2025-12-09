@@ -43,7 +43,6 @@ Promise.all([
   .then(() => {
     app.listen(PORT, HOST, () => {
       console.log(`Server running on PORT ${PORT}`);
-      console.log(`Server accessible at http://192.168.1.3:${PORT}`);
     });
   })
   .catch(err => {

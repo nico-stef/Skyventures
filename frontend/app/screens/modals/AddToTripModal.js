@@ -68,11 +68,11 @@ export default function AddToTripModal({
     const dates = [];
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
-    
+
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       dates.push(new Date(d));
     }
-    
+
     return dates;
   };
 
@@ -84,8 +84,14 @@ export default function AddToTripModal({
   const handleDateSelect = async (date) => {
     setSelectedDate(date);
 
+    // Set default time to 9:00 AM
+    const defaultTime = new Date();
+    defaultTime.setHours(9, 0, 0, 0);
+    const timeString = `${defaultTime.getHours().toString().padStart(2, '0')}:${defaultTime.getMinutes().toString().padStart(2, '0')}:00`;
+
     const itemData = {
       dayDate: date.toISOString().split('T')[0],
+      startTime: timeString,
       placeName: placeData.name,
       placeId: placeData.place_id || null,
       placeAddress: placeData.vicinity || placeData.formatted_address || null,

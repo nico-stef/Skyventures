@@ -10,6 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { tripsStyles } from "../../styles/TripsStyles";
 import { addExpense } from "../../functions/tripsFunctions";
 
@@ -33,12 +34,27 @@ export default function AddExpenseModal({
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const resetForm = () => {
     setCategory("Food & Dining");
     setAmount("");
     setDescription("");
     setExpenseDate(new Date());
+  };
+
+  const formatDateDisplay = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setExpenseDate(selectedDate);
+    }
   };
 
   const handleAdd = async () => {
@@ -51,7 +67,7 @@ export default function AddExpenseModal({
       category,
       amount: parseFloat(amount),
       description: description.trim(),
-      expenseDate: expenseDate.toISOString().split('T')[0],
+      expenseDate: formatDateDisplay(expenseDate),
     };
 
     try {
@@ -105,12 +121,21 @@ export default function AddExpenseModal({
             </View>
 
             <Text style={tripsStyles.inputLabel}>Date *</Text>
-            <TextInput
+            <TouchableOpacity
               style={tripsStyles.input}
-              placeholder="YYYY-MM-DD"
-              value={expenseDate.toISOString().split('T')[0]}
-              editable={false}
-            />
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={{ fontSize: 16 }}>{formatDateDisplay(expenseDate)}</Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={expenseDate}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
 
             <Text style={tripsStyles.inputLabel}>Description</Text>
             <TextInput

@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { tripsStyles } from "../../styles/TripsStyles";
 import { deleteItineraryItem, updateItineraryItem } from "../../functions/tripsFunctions";
 import AddItineraryModal from "../modals/AddItineraryModal";
 
 export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) {
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   const groupItemsByDay = () => {
     const grouped = {};
@@ -21,12 +23,21 @@ export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) 
       }
       grouped[dateKey].push(item);
     });
-    
-    // Sort items within each day by orderIndex
+
+    // Sort items within each day by startTime
     Object.keys(grouped).forEach(key => {
-      grouped[key].sort((a, b) => a.orderIndex - b.orderIndex);
+      grouped[key].sort((a, b) => {
+        // If both have startTime, sort by time
+        if (a.startTime && b.startTime) {
+          return a.startTime.localeCompare(b.startTime);
+        }
+        // Items without time go to the end
+        if (!a.startTime) return 1;
+        if (!b.startTime) return -1;
+        return 0;
+      });
     });
-    
+
     return grouped;
   };
 
@@ -37,6 +48,29 @@ export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) 
       month: 'long',
       day: 'numeric',
       year: 'numeric'
+    });
+  };
+
+  const formatDateShort = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return null;
+
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -66,39 +100,15 @@ export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) 
     );
   };
 
-  const handleMoveItem = async (item, direction) => {
-    const dayItems = groupedItems[item.dayDate];
-    const currentIndex = dayItems.findIndex(i => i.itemId === item.itemId);
-    
-    if (
-      (direction === 'up' && currentIndex === 0) ||
-      (direction === 'down' && currentIndex === dayItems.length - 1)
-    ) {
-      return;
-    }
-
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const swapItem = dayItems[newIndex];
-
-    try {
-      // Swap order indices
-      await updateItineraryItem(tripId, item.itemId, userId, {
-        dayDate: item.dayDate,
-        placeName: item.placeName,
-        notes: item.notes,
-        orderIndex: swapItem.orderIndex
+  const handleViewPlace = (item) => {
+    if (item.placeId) {
+      navigation.navigate("PlaceScreen", {
+        place: {
+          place_id: item.placeId,
+          name: item.placeName,
+          vicinity: item.placeAddress
+        }
       });
-
-      await updateItineraryItem(tripId, swapItem.itemId, userId, {
-        dayDate: swapItem.dayDate,
-        placeName: swapItem.placeName,
-        notes: swapItem.notes,
-        orderIndex: item.orderIndex
-      });
-
-      onUpdate();
-    } catch (error) {
-      Alert.alert("Error", "Failed to reorder items");
     }
   };
 
@@ -146,7 +156,16 @@ export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) 
 
           {groupedItems[date].map((item, index) => (
             <View key={item.itemId} style={tripsStyles.itineraryItem}>
-              <View style={tripsStyles.itineraryItemContent}>
+              <TouchableOpacity
+                style={tripsStyles.itineraryItemContent}
+                onPress={() => handleViewPlace(item)}
+                disabled={!item.placeId}
+              >
+                {item.startTime && (
+                  <Text style={{ fontSize: 13, color: '#886ae6', fontWeight: 'bold', marginBottom: 6 }}>
+                    {formatTime(item.startTime)}
+                  </Text>
+                )}
                 <Text style={tripsStyles.itineraryItemName}>
                   {item.placeName}
                 </Text>
@@ -160,27 +179,15 @@ export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) 
                     {item.notes}
                   </Text>
                 ) : null}
-              </View>
+                {item.placeId && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#f0f0f0' }}>
+                    <Text style={{ fontSize: 12, color: '#886ae6', fontWeight: '500' }}>Tap for details</Text>
+                    <Text style={{ fontSize: 18, color: '#886ae6' }}>›</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
 
               <View style={tripsStyles.itineraryItemActions}>
-                {index > 0 && (
-                  <TouchableOpacity
-                    style={tripsStyles.actionButton}
-                    onPress={() => handleMoveItem(item, 'up')}
-                  >
-                    <Text style={{ fontSize: 18 }}>↑</Text>
-                  </TouchableOpacity>
-                )}
-
-                {index < groupedItems[date].length - 1 && (
-                  <TouchableOpacity
-                    style={tripsStyles.actionButton}
-                    onPress={() => handleMoveItem(item, 'down')}
-                  >
-                    <Text style={{ fontSize: 18 }}>↓</Text>
-                  </TouchableOpacity>
-                )}
-
                 <TouchableOpacity
                   style={tripsStyles.actionButton}
                   onPress={() => handleDeleteItem(item.itemId)}

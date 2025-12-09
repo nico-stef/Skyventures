@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
 } from "react-native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { tripsStyles } from "../../styles/TripsStyles";
 import { createTrip } from "../../functions/tripsFunctions";
 
@@ -19,6 +20,8 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
   const [endDate, setEndDate] = useState(today);
   const [budget, setBudget] = useState("");
   const [description, setDescription] = useState("");
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const resetForm = () => {
     const today = new Date();
@@ -27,6 +30,27 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
     setEndDate(today);
     setBudget("");
     setDescription("");
+  };
+
+  const handleStartDateChange = (event, selectedDate) => {
+    setShowStartDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setStartDate(selectedDate);
+    }
+  };
+
+  const handleEndDateChange = (event, selectedDate) => {
+    setShowEndDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setEndDate(selectedDate);
+    }
+  };
+
+  const formatDateDisplay = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const handleCreate = async () => {
@@ -44,8 +68,8 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
       const result = await createTrip(
         userId,
         destination.trim(),
-        startDate.toISOString().split('T')[0],
-        endDate.toISOString().split('T')[0],
+        formatDateDisplay(startDate),
+        formatDateDisplay(endDate),
         parseFloat(budget) || 0,
         description.trim()
       );
@@ -63,15 +87,15 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
 
   return (
     <Modal
-        visible={visible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={onClose}
-      >
-        <View style={tripsStyles.modalOverlay}>
-          <View style={tripsStyles.modalContent}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={tripsStyles.modalTitle}>Create New Trip</Text>
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={tripsStyles.modalOverlay}>
+        <View style={tripsStyles.modalContent}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={tripsStyles.modalTitle}>Create New Trip</Text>
 
             <Text style={tripsStyles.inputLabel}>Destination *</Text>
             <TextInput
@@ -82,20 +106,42 @@ export default function CreateTripModal({ visible, onClose, onSuccess, userId })
             />
 
             <Text style={tripsStyles.inputLabel}>Start Date *</Text>
-            <TextInput
-              style={tripsStyles.input}
-              placeholder="YYYY-MM-DD"
-              value={startDate.toISOString().split('T')[0]}
-              editable={false}
-            />
+            <TouchableOpacity
+              style={tripsStyles.timePickerButton}
+              onPress={() => setShowStartDatePicker(true)}
+            >
+              <Text style={tripsStyles.timePickerText}>
+                {formatDateDisplay(startDate)}
+              </Text>
+            </TouchableOpacity>
+
+            {showStartDatePicker && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="default"
+                onChange={handleStartDateChange}
+              />
+            )}
 
             <Text style={tripsStyles.inputLabel}>End Date *</Text>
-            <TextInput
-              style={tripsStyles.input}
-              placeholder="YYYY-MM-DD"
-              value={endDate.toISOString().split('T')[0]}
-              editable={false}
-            />
+            <TouchableOpacity
+              style={tripsStyles.timePickerButton}
+              onPress={() => setShowEndDatePicker(true)}
+            >
+              <Text style={tripsStyles.timePickerText}>
+                {formatDateDisplay(endDate)}
+              </Text>
+            </TouchableOpacity>
+
+            {showEndDatePicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="default"
+                onChange={handleEndDateChange}
+              />
+            )}
 
             <Text style={tripsStyles.inputLabel}>Budget</Text>
             <TextInput

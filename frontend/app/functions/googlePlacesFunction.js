@@ -10,7 +10,7 @@ export const getNearbyPlaces = async (latitude, longitude, type) => {
     const response = await axios.get(`${BASE_URL}/nearbysearch/json`, {
       params: {
         location: `${latitude},${longitude}`,
-        radius: 1000,
+        radius: 2000,
         type: type, // Uses the type passed from `NearbyPlaces`
         key: API_KEY,
       },
@@ -59,6 +59,7 @@ export const getFavoritePlacesDetails = async (placeIds) => {
 
           return {
             id: placeId,
+            place_id: placeId,
             name: details.name || "Unknown Place",
             address: details.formatted_address || "No address available",
             rating: details.rating || "No rating",
@@ -68,6 +69,7 @@ export const getFavoritePlacesDetails = async (placeIds) => {
           // If details is undefined, return a fallback object
           return {
             id: placeId,
+            place_id: placeId,
             name: "Unknown Place",
             address: "No address available",
             rating: null,
@@ -78,6 +80,7 @@ export const getFavoritePlacesDetails = async (placeIds) => {
         console.error(`Error fetching details for place ID ${placeId}:`, error);
         return {
           id: placeId,
+          place_id: placeId,
           name: "Unknown Place",
           address: "No address available",
           rating: null,
@@ -92,5 +95,38 @@ export const getFavoritePlacesDetails = async (placeIds) => {
   } catch (error) {
     console.error("Error fetching favorite places details:", error);
     throw error;
+  }
+};
+
+export const searchPlaces = async (query, location = "") => {
+  try {
+    const response = await axios.get(`${BASE_URL}/textsearch/json`, {
+      params: {
+        query: location ? `${query} in ${location}` : query,
+        key: API_KEY,
+      },
+    });
+
+    if (response.data.results) {
+      return response.data.results.map(place => {
+        const photoUrl = place.photos?.length
+          ? getPlacePhotoUrl(place.photos[0].photo_reference, 400, 400)
+          : null;
+
+        return {
+          place_id: place.place_id,
+          name: place.name,
+          vicinity: place.formatted_address || place.vicinity,
+          formatted_address: place.formatted_address,
+          rating: place.rating,
+          photoUrl: photoUrl,
+        };
+      });
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error searching places:", error);
+    return [];
   }
 };

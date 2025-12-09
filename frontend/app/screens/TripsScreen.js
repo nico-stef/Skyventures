@@ -75,10 +75,10 @@ export default function TripsScreen() {
   };
 
   const renderTripCard = ({ item }) => {
-    const budgetPercentage = calculateBudgetPercentage(
-      parseFloat(item.totalSpent || 0),
-      parseFloat(item.budget || 0)
-    );
+    const totalSpent = parseFloat(item.totalSpent || 0);
+    const totalBudget = parseFloat(item.budget || 0);
+    const budgetRemaining = totalBudget - totalSpent;
+    const budgetPercentage = calculateBudgetPercentage(totalSpent, totalBudget);
     const isOverBudget = budgetPercentage > 100;
 
     return (
@@ -93,9 +93,16 @@ export default function TripsScreen() {
         </Text>
 
         <View style={tripsStyles.tripBudgetContainer}>
-          <Text style={tripsStyles.tripBudgetText}>
-            Budget: ${parseFloat(item.totalSpent || 0).toFixed(2)} / $
-            {parseFloat(item.budget || 0).toFixed(2)}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text style={tripsStyles.tripBudgetText}>
+              Spent: ${totalSpent.toFixed(2)}
+            </Text>
+            <Text style={[tripsStyles.tripBudgetText, { color: isOverBudget ? '#f44336' : '#4caf50' }]}>
+              Remaining: ${budgetRemaining.toFixed(2)}
+            </Text>
+          </View>
+          <Text style={[tripsStyles.tripBudgetText, { fontSize: 12, color: '#999', marginBottom: 6 }]}>
+            Total Budget: ${totalBudget.toFixed(2)}
           </Text>
           <View style={tripsStyles.budgetProgressBar}>
             <View
@@ -119,7 +126,7 @@ export default function TripsScreen() {
             <Text style={tripsStyles.tripStatValue}>
               {Math.ceil(
                 (new Date(item.endDate) - new Date(item.startDate)) /
-                  (1000 * 60 * 60 * 24)
+                (1000 * 60 * 60 * 24)
               )}
             </Text>
             <Text style={tripsStyles.tripStatLabel}>Days</Text>
