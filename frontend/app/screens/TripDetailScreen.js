@@ -249,6 +249,7 @@ export default function TripDetailScreen() {
 
       <ScrollView
         style={tripsStyles.tabContent}
+        contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

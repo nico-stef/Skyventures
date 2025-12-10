@@ -229,7 +229,7 @@ export default function HomeScreen(props) {
       </View>
       <FlatList
         style={{ flex: 1, backgroundColor: '#f5f5f5' }}
-        contentContainerStyle={tripsStyles.tripsList}
+        contentContainerStyle={[tripsStyles.tripsList, { paddingBottom: 100 }]}
         data={places}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.place_id}

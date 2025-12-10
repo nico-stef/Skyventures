@@ -154,7 +154,7 @@ export default function TripsScreen() {
         data={trips}
         renderItem={renderTripCard}
         keyExtractor={(item) => item.tripId.toString()}
-        contentContainerStyle={trips.length === 0 ? { flex: 1 } : tripsStyles.tripsList}
+        contentContainerStyle={trips.length === 0 ? { flex: 1, paddingBottom: 100 } : [tripsStyles.tripsList, { paddingBottom: 100 }]}
         ListEmptyComponent={!loading && renderEmptyState()}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

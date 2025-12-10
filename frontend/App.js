@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Platform } from "react-native";
 import StartScreen from "./app/screens/StartScreen";
 import LoginScreen from "./app/screens/LoginScreen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -13,12 +13,15 @@ import PlaceScreen from "./app/screens/PlaceScreen";
 import FavoritesScreen from "./app/screens/FavoritesScreen";
 import TripsScreen from "./app/screens/TripsScreen";
 import TripDetailScreen from "./app/screens/TripDetailScreen";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // Main Tab Navigator for authenticated users
 function MainTabs() {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Tab.Navigator
       screenOptions={{
@@ -26,8 +29,9 @@ function MainTabs() {
         tabBarActiveTintColor: '#886ae6',
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
-          height: 90,
-          paddingBottom: 15,
+          height: Platform.OS === 'android' ? 75 + insets.bottom : 90,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom + 5 : 15,
+          paddingTop: 0,
           borderTopColor: '#d0d0d0',
           elevation: 12,
           shadowColor: '#000',
@@ -43,7 +47,7 @@ function MainTabs() {
           marginBottom: 0,
         },
         tabBarIconStyle: {
-          marginTop: 10,
+          marginTop: 12,
           marginBottom: 0,
         },
       }}
@@ -54,7 +58,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Explore',
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: 28, color, marginBottom: 4 }}>🔍</Text>
+            <Text style={{ fontSize: 28, color }}>🔍</Text>
           ),
         }}
       />
@@ -64,7 +68,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'My Trips',
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: 28, color, marginBottom: 4 }}>✈️</Text>
+            <Text style={{ fontSize: 28, color }}>✈️</Text>
           ),
         }}
       />
@@ -74,7 +78,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Weather',
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: 28, color, marginBottom: 4 }}>🌤️</Text>
+            <Text style={{ fontSize: 28, color }}>🌤️</Text>
           ),
         }}
       />
@@ -84,7 +88,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Favorites',
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: 28, color, marginBottom: 4 }}>♥</Text>
+            <Text style={{ fontSize: 28, color }}>♥</Text>
           ),
         }}
       />

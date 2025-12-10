@@ -175,7 +175,7 @@ const FavoritesScreen = () => {
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={favorites.length === 0 ? { flex: 1 } : tripsStyles.tripsList}
+        contentContainerStyle={favorites.length === 0 ? { flex: 1, paddingBottom: 100 } : [tripsStyles.tripsList, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={!loading && renderEmptyState()}
         refreshControl={
