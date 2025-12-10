@@ -27,6 +27,7 @@ export default function RegisterScreen(props) {
     email: "",
     password: "",
   });
+
   React.useEffect(() => {
     const unsubscribe = navigation.addListener("state", () => {
       animationDoneRegister = false;
@@ -40,7 +41,7 @@ export default function RegisterScreen(props) {
 
   React.useEffect(() => {
     if (!animationDoneRegister) {
-      Animated.timing(loadingProgress, {
+      Animated.timing(loadingProgress, { //creste loadingProgress de la 0 la 100 în 700 ms
         toValue: 100,
         duration: 700,
         useNativeDriver: true,
@@ -100,69 +101,69 @@ export default function RegisterScreen(props) {
           colors={["#8B5CF6", "#b794f6"]}
           style={registerStyles.background}
         >
-        <SafeAreaView style={registerStyles.logoContainer}>
-              <Animated.View style={moveDown}>
-                <Image
-                  source={require("../assets/skyventures-logo.png")}
-                  style={registerStyles.logo}
-                />
-                <Text style={registerStyles.createAccountText}>Create Account</Text>
-              </Animated.View>
-            </SafeAreaView>
+          <SafeAreaView style={registerStyles.logoContainer}>
+            <Animated.View style={moveDown}>
+              <Image
+                source={require("../assets/skyventures-logo.png")}
+                style={registerStyles.logo}
+              />
+              <Text style={registerStyles.createAccountText}>Create Account</Text>
+            </Animated.View>
+          </SafeAreaView>
 
-            <Animated.View style={[opacityClearToVisible, registerStyles.registerContainer]}>
-          <View style={registerStyles.credentialsContainer}>
-            <TextInput
-              inputMode="text"
-              style={registerStyles.inputControl}
-              autoCapitalize="none"
-              autoCorrect={false}
-              textContentType="oneTimeCode"
-              onChangeText={(username) => setForm({ ...form, username })}
-              value={form.username}
-              placeholder="Name"
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              inputMode="email"
-              style={registerStyles.inputControl}
-              autoCorrect={false}
-              autoCapitalize="none"
-              textContentType="oneTimeCode"
-              onChangeText={(email) => setForm({ ...form, email })}
-              value={form.email}
-              placeholder="Email"
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              secureTextEntry
-              style={registerStyles.inputControl}
-              onChangeText={(password) => setForm({ ...form, password })}
-              value={form.password}
-              placeholder="Password"
-              placeholderTextColor="#999"
-            />
+          <Animated.View style={[opacityClearToVisible, registerStyles.registerContainer]}>
+            <View style={registerStyles.credentialsContainer}>
+              <TextInput
+                inputMode="text"
+                style={registerStyles.inputControl}
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="oneTimeCode"
+                onChangeText={(username) => setForm({ ...form, username })}
+                value={form.username}
+                placeholder="Name"
+                placeholderTextColor="#999"
+              />
+              <TextInput
+                inputMode="email"
+                style={registerStyles.inputControl}
+                autoCorrect={false}
+                autoCapitalize="none"
+                textContentType="oneTimeCode"
+                onChangeText={(email) => setForm({ ...form, email })}
+                value={form.email}
+                placeholder="Email"
+                placeholderTextColor="#999"
+              />
+              <TextInput
+                secureTextEntry
+                style={registerStyles.inputControl}
+                onChangeText={(password) => setForm({ ...form, password })}
+                value={form.password}
+                placeholder="Password"
+                placeholderTextColor="#999"
+              />
+
+              <TouchableOpacity
+                style={registerStyles.registerButton}
+                onPress={handleRegister}
+                activeOpacity={0.8}
+              >
+                <Text style={registerStyles.registerButtonText}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
-              style={registerStyles.registerButton}
-              onPress={handleRegister}
-              activeOpacity={0.8}
+              style={registerStyles.loginContainer}
+              onPress={() => navigation.navigate("Login")}
+              activeOpacity={0.7}
             >
-              <Text style={registerStyles.registerButtonText}>Sign up</Text>
+              <Text style={registerStyles.loginText}>
+                Already have an account? Login here
+              </Text>
             </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={registerStyles.loginContainer}
-            onPress={() => navigation.navigate("Login")}
-            activeOpacity={0.7}
-          >
-            <Text style={registerStyles.loginText}>
-              Already have an account? Login here
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </LinearGradient>
+          </Animated.View>
+        </LinearGradient>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

@@ -5,8 +5,6 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  Animated,
   FlatList,
   RefreshControl,
 } from "react-native";
@@ -52,10 +50,7 @@ export default function HomeScreen(props) {
         // Fall back to current position if last known is unavailable
         const currentLocation = await Location.getCurrentPositionAsync();
         setLocation(currentLocation.coords);
-        fetchNearbyPlaces(
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude
-        );
+        fetchNearbyPlaces(currentLocation.coords.latitude, currentLocation.coords.longitude);
       }
     };
 
@@ -78,7 +73,7 @@ export default function HomeScreen(props) {
     setLoading(true); // Start loading
     try {
       const data = await getNearbyPlaces(latitude, longitude, placeType);
-      setPlaces(data.results.slice(0, 10));
+      setPlaces(data.results.slice(0, 20));
     } catch (err) {
       console.error(err);
     } finally {
@@ -94,8 +89,8 @@ export default function HomeScreen(props) {
     }
   };
 
-  const [search, setSearch] = useState("");
   const data = [
+    { label: "All Places", value: null },
     { label: "Restaurants", value: "restaurant" },
     { label: "Hotels", value: "lodging" },
     { label: "Cafes", value: "cafe" },
@@ -105,26 +100,10 @@ export default function HomeScreen(props) {
     { label: "Hospitals", value: "hospital" },
     { label: "Shops", value: "store" },
   ];
+
   const handlePlaceTypeSelection = (item) => {
-    setValue(item.value); // update selected value
-    // Navigate to NearbyPlaces with the selected place type
     setPlaceType(item.value);
   };
-
-  const [value, setValue] = useState(null);
-  const updateSearch = (search) => {
-    setSearch(search);
-  };
-  // animated value for entrance animations
-  const loadingProgress = React.useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    Animated.timing(loadingProgress, {
-      toValue: 100,
-      duration: 700,
-      useNativeDriver: true,
-    }).start();
-  }, [loadingProgress]);
 
   const [favorites, setFavorites] = useState([]);
 
@@ -223,7 +202,7 @@ export default function HomeScreen(props) {
           valueField="value"
           placeholder="Select category"
           searchPlaceholder="Search..."
-          value={value}
+          value={placeType}
           onChange={handlePlaceTypeSelection}
         />
       </View>
@@ -278,7 +257,7 @@ export default function HomeScreen(props) {
               </Text>
               <TouchableOpacity
                 onPress={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); //impiedica navigarea la PlaceScreen
                   handleAddFavorites(item.place_id);
                 }}
                 style={{ padding: 4 }}

@@ -25,6 +25,7 @@ export const getNearbyPlaces = async (latitude, longitude, type) => {
   }
 };
 
+//returnează string (URL) din backend pentru a obține poza
 export const getPlacePhotoUrl = (
   photoReference, //code that identifies the photo. its returned in the place details response. its not the url
   maxWidth = 400,
@@ -50,56 +51,35 @@ export const getPlaceDetails = async (placeId) => {
 };
 
 export const getFavoritePlacesDetails = async (placeIds) => {
-  try {
-    const placeDetailsPromises = placeIds.map(async (placeId) => {
-      try {
-        const details = await getPlaceDetails(placeId);
+  const placeDetailsPromises = placeIds.map(async (placeId) => {
+    try {
+      const details = await getPlaceDetails(placeId);
+      const photoUrl = details.photos?.length //url-ul construit cu getPlacePhotoUrl. in componenta <Image> se face automat un GET request la URL-ul din uri.
+        ? getPlacePhotoUrl(details.photos[0].photo_reference, 400, 400)
+        : null;
 
-        // Check if details exist and handle missing properties gracefully
-        if (details) {
-          const photoUrl = details.photos?.length
-            ? getPlacePhotoUrl(details.photos[0].photo_reference, 400, 400)
-            : null;
+      return {
+        id: placeId,
+        place_id: placeId,
+        name: details.name || "Unknown Place",
+        address: details.formatted_address || "No address available",
+        rating: details.rating || "No rating",
+        photoUrl,
+      };
+    } catch (error) {
+      console.error(`Error fetching details for place ID ${placeId}:`, error);
+      return {
+        id: placeId,
+        place_id: placeId,
+        name: "Unknown Place",
+        address: "No address available",
+        rating: null,
+        photoUrl: null,
+      };
+    }
+  });
 
-          return {
-            id: placeId,
-            place_id: placeId,
-            name: details.name || "Unknown Place",
-            address: details.formatted_address || "No address available",
-            rating: details.rating || "No rating",
-            photoUrl: photoUrl,
-          };
-        } else {
-          // If details is undefined, return a fallback object
-          return {
-            id: placeId,
-            place_id: placeId,
-            name: "Unknown Place",
-            address: "No address available",
-            rating: null,
-            photoUrl: null,
-          };
-        }
-      } catch (error) {
-        console.error(`Error fetching details for place ID ${placeId}:`, error);
-        return {
-          id: placeId,
-          place_id: placeId,
-          name: "Unknown Place",
-          address: "No address available",
-          rating: null,
-          photoUrl: null,
-        };
-      }
-    });
-
-    // Wait for all place details promises to resolve
-    const placesDetails = await Promise.all(placeDetailsPromises);
-    return placesDetails;
-  } catch (error) {
-    console.error("Error fetching favorite places details:", error);
-    throw error;
-  }
+  return Promise.all(placeDetailsPromises);
 };
 
 export const searchPlaces = async (query, location = "") => {
