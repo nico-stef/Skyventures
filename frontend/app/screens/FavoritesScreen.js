@@ -10,7 +10,6 @@ import {
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { tripsStyles } from "../styles/TripsStyles";
-import { getPlacePhotoUrl } from "../functions/googlePlacesFunction";
 import * as SecureStore from "expo-secure-store";
 import { getFavoritePlacesDetails } from "../functions/googlePlacesFunction";
 import Constants from 'expo-constants';
@@ -19,21 +18,9 @@ const API_URL = Constants.expoConfig.extra.API_URL;
 
 const FavoritesScreen = () => {
   const navigation = useNavigation();
-  const [username, setUsername] = useState("");
-  const [userId, setUserId] = useState("");
   const [favorites, setFavorites] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getUserData = async () => {
-      const username = await SecureStore.getItemAsync("username");
-      setUsername(username);
-      const userId = await SecureStore.getItemAsync("userId");
-      setUserId(userId);
-    };
-    getUserData();
-  }, []);
 
   const fetchFavorites = async () => {
     try {
@@ -50,9 +37,7 @@ const FavoritesScreen = () => {
       );
       const data = await response.json();
       const favoritePlaceIds = data.map((fav) => fav.placeId);
-      const favoritePlacesDetails = await getFavoritePlacesDetails(
-        favoritePlaceIds
-      );
+      const favoritePlacesDetails = await getFavoritePlacesDetails(favoritePlaceIds);
       setFavorites(favoritePlacesDetails);
     } catch (err) {
       console.log("Error fetching favorites: ", err);
