@@ -21,12 +21,10 @@ export default function ExpensesTab({
   const [addModalVisible, setAddModalVisible] = useState(false);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    const dateStr = dateString.split(/[T ]/)[0]; // Handle both 'T' and space
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${monthNames[month - 1]} ${day}, ${year}`;
   };
 
   const totalSpent = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);

@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { tripsStyles } from "../../styles/TripsStyles";
 import { addItineraryItem } from "../../functions/tripsFunctions";
 import { searchPlaces } from "../../functions/googlePlacesFunction";
@@ -30,6 +31,8 @@ export default function AddItineraryModal({
   const [placeName, setPlaceName] = useState("");
   const [dayDate, setDayDate] = useState(new Date());
   const [startTime, setStartTime] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [notes, setNotes] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -56,8 +59,9 @@ export default function AddItineraryModal({
       }
       // Set initial date to trip start date
       if (trip) {
-        const startParts = trip.startDate.split('T')[0].split('-');
-        const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+        const startDateStr = trip.startDate.split(/[T ]/)[0];
+        const [year, month, day] = startDateStr.split('-').map(Number);
+        const startDate = new Date(year, month - 1, day);
         setDayDate(startDate);
       }
       // Set default time to 9:00 AM
@@ -75,8 +79,9 @@ export default function AddItineraryModal({
     setManualEntry(false);
     setNotes("");
     if (trip) {
-      const startParts = trip.startDate.split('T')[0].split('-');
-      const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+      const startDateStr = trip.startDate.split(/[T ]/)[0];
+      const [year, month, day] = startDateStr.split('-').map(Number);
+      const startDate = new Date(year, month - 1, day);
       setDayDate(startDate);
     }
     const defaultTime = new Date();
@@ -124,6 +129,20 @@ export default function AddItineraryModal({
     setSelectedPlace(null);
     setSearchQuery("");
     setSearchResults([]);
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDayDate(selectedDate);
+    }
+  };
+
+  const handleTimeChange = (event, selectedTime) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      setStartTime(selectedTime);
+    }
   };
 
   const formatTime = (date) => {
@@ -197,11 +216,13 @@ export default function AddItineraryModal({
     if (!trip) return [];
 
     const dates = [];
-    const startParts = trip.startDate.split('T')[0].split('-');
-    const endParts = trip.endDate.split('T')[0].split('-');
-
-    const start = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
-    const end = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
+    const startDateStr = trip.startDate.split(/[T ]/)[0];
+    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+    const start = new Date(startYear, startMonth - 1, startDay);
+    
+    const endDateStr = trip.endDate.split(/[T ]/)[0];
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const end = new Date(endYear, endMonth - 1, endDay);
 
     console.log('Trip dates - start:', start, 'end:', end);
 
@@ -303,19 +324,44 @@ export default function AddItineraryModal({
 
             {/* Time Picker */}
             <Text style={tripsStyles.inputLabel}>Start Time *</Text>
-            <TextInput
+            <TouchableOpacity
               style={tripsStyles.input}
-              value={formatTime(startTime)}
-              editable={false}
-            />
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Text style={{ fontSize: 16, color: '#333', paddingVertical: 2 }}>
+                {formatTime(startTime)}
+              </Text>
+            </TouchableOpacity>
+
+            {showTimePicker && (
+              <DateTimePicker
+                value={startTime}
+                mode="time"
+                is24Hour={false}
+                display="default"
+                onChange={handleTimeChange}
+              />
+            )}
 
             {/* Day Picker */}
             <Text style={tripsStyles.inputLabel}>Select Day *</Text>
-            <TextInput
+            <TouchableOpacity
               style={tripsStyles.input}
-              value={formatDateDisplay(dayDate)}
-              editable={false}
-            />
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={{ fontSize: 16, color: '#333', paddingVertical: 2 }}>
+                {formatDateDisplay(dayDate)}
+              </Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={dayDate}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
 
             <Text style={tripsStyles.inputLabel}>Notes</Text>
             <TextInput

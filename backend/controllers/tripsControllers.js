@@ -15,7 +15,24 @@ const getUserTrips = async (req, res) => {
       [userId]
     );
 
-    res.status(200).json({ trips });
+    // Format dates to YYYY-MM-DD to avoid timezone issues
+    // Use local date components instead of toISOString() to avoid UTC conversion
+    const formattedTrips = trips.map(trip => {
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      return {
+        ...trip,
+        startDate: formatDate(trip.startDate),
+        endDate: formatDate(trip.endDate)
+      };
+    });
+
+    res.status(200).json({ trips: formattedTrips });
   } catch (err) {
     console.error("Error fetching trips:", err);
     res.status(500).json({ error: "Failed to fetch trips" });
@@ -42,7 +59,22 @@ const getTripById = async (req, res) => {
       return res.status(404).json({ error: "Trip not found" });
     }
 
-    res.status(200).json({ trip: trips[0] });
+    // Format dates to YYYY-MM-DD to avoid timezone issues
+    // Use local date components instead of toISOString() to avoid UTC conversion
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const trip = {
+      ...trips[0],
+      startDate: formatDate(trips[0].startDate),
+      endDate: formatDate(trips[0].endDate)
+    };
+
+    res.status(200).json({ trip });
   } catch (err) {
     console.error("Error fetching trip:", err);
     res.status(500).json({ error: "Failed to fetch trip" });
@@ -58,6 +90,10 @@ const createTrip = async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
+  console.log('===== CREATE TRIP REQUEST =====');
+  console.log('Received startDate:', startDate);
+  console.log('Received endDate:', endDate);
+
   try {
     const [result] = await pool.query(
       `INSERT INTO trips (userId, destination, startDate, endDate, budget, description) 
@@ -70,9 +106,26 @@ const createTrip = async (req, res) => {
       [result.insertId]
     );
 
+    console.log('Saved trip startDate:', newTrip[0].startDate);
+    console.log('Saved trip endDate:', newTrip[0].endDate);
+
+    // Normalize dates to YYYY-MM-DD format using local date components
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const normalizedTrip = {
+      ...newTrip[0],
+      startDate: formatDate(newTrip[0].startDate),
+      endDate: formatDate(newTrip[0].endDate)
+    };
+
     res.status(201).json({
       message: "Trip created successfully",
-      trip: newTrip[0]
+      trip: normalizedTrip
     });
   } catch (err) {
     console.error("Error creating trip:", err);
@@ -85,6 +138,10 @@ const updateTrip = async (req, res) => {
   const { tripId } = req.params;
   const userId = req.user.userId; // Get from JWT token
   const { destination, startDate, endDate, budget, description } = req.body;
+
+  console.log('===== UPDATE TRIP REQUEST =====');
+  console.log('Received startDate:', startDate);
+  console.log('Received endDate:', endDate);
 
   try {
     const [result] = await pool.query(
@@ -103,9 +160,26 @@ const updateTrip = async (req, res) => {
       [tripId]
     );
 
+    console.log('Updated trip startDate:', updatedTrip[0].startDate);
+    console.log('Updated trip endDate:', updatedTrip[0].endDate);
+
+    // Normalize dates to YYYY-MM-DD format using local date components
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const normalizedTrip = {
+      ...updatedTrip[0],
+      startDate: formatDate(updatedTrip[0].startDate),
+      endDate: formatDate(updatedTrip[0].endDate)
+    };
+
     res.status(200).json({
       message: "Trip updated successfully",
-      trip: updatedTrip[0]
+      trip: normalizedTrip
     });
   } catch (err) {
     console.error("Error updating trip:", err);
@@ -158,7 +232,23 @@ const getItineraryItems = async (req, res) => {
       [tripId]
     );
 
-    res.status(200).json({ items });
+    // Format dates to YYYY-MM-DD to avoid timezone issues
+    // Use local date components instead of toISOString() to avoid UTC conversion
+    const formattedItems = items.map(item => {
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      return {
+        ...item,
+        dayDate: formatDate(item.dayDate)
+      };
+    });
+
+    res.status(200).json({ items: formattedItems });
   } catch (err) {
     console.error("Error fetching itinerary items:", err);
     res.status(500).json({ error: "Failed to fetch itinerary items" });
@@ -207,9 +297,22 @@ const addItineraryItem = async (req, res) => {
 
     console.log('Created item:', newItem[0]);
 
+    // Format date to YYYY-MM-DD using local date components
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const formattedItem = {
+      ...newItem[0],
+      dayDate: formatDate(newItem[0].dayDate)
+    };
+
     res.status(201).json({
       message: "Itinerary item added successfully",
-      item: newItem[0]
+      item: formattedItem
     });
   } catch (err) {
     console.error("Error adding itinerary item:", err);
@@ -257,9 +360,22 @@ const updateItineraryItem = async (req, res) => {
       [itemId]
     );
 
+    // Normalize date to YYYY-MM-DD format using local date components
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const normalizedItem = {
+      ...updatedItem[0],
+      dayDate: formatDate(updatedItem[0].dayDate)
+    };
+
     res.status(200).json({
       message: "Itinerary item updated successfully",
-      item: updatedItem[0]
+      item: normalizedItem
     });
   } catch (err) {
     console.error("Error updating itinerary item:", err);
@@ -331,7 +447,23 @@ const getExpenses = async (req, res) => {
       [tripId]
     );
 
-    res.status(200).json({ expenses, categoryTotals });
+    // Format dates to YYYY-MM-DD to avoid timezone issues
+    // Use local date components instead of toISOString() to avoid UTC conversion
+    const formattedExpenses = expenses.map(expense => {
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      return {
+        ...expense,
+        expenseDate: formatDate(expense.expenseDate)
+      };
+    });
+
+    res.status(200).json({ expenses: formattedExpenses, categoryTotals });
   } catch (err) {
     console.error("Error fetching expenses:", err);
     res.status(500).json({ error: "Failed to fetch expenses" });
@@ -370,9 +502,22 @@ const addExpense = async (req, res) => {
       [result.insertId]
     );
 
+    // Normalize date to YYYY-MM-DD format using local date components
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const normalizedExpense = {
+      ...newExpense[0],
+      expenseDate: formatDate(newExpense[0].expenseDate)
+    };
+
     res.status(201).json({
       message: "Expense added successfully",
-      expense: newExpense[0]
+      expense: normalizedExpense
     });
   } catch (err) {
     console.error("Error adding expense:", err);

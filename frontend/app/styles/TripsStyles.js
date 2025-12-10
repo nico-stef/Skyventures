@@ -385,8 +385,8 @@ export const tripsStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 25,
-    width: width - 40,
-    maxHeight: '80%',
+    width: width - 20,
+    maxHeight: '95%',
   },
   modalTitle: {
     fontSize: 22,

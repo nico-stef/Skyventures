@@ -7,17 +7,21 @@ export default function OverviewTab({ trip, userId, onUpdate, onDelete }) {
   const [editModalVisible, setEditModalVisible] = useState(false);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    const dateStr = dateString.split(/[T ]/)[0]; // Handle both 'T' and space
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[month - 1]} ${day}, ${year}`;
   };
 
   const calculateDays = () => {
-    const start = new Date(trip.startDate);
-    const end = new Date(trip.endDate);
+    const startStr = trip.startDate.split(/[T ]/)[0];
+    const [startYear, startMonth, startDay] = startStr.split('-').map(Number);
+    
+    const endStr = trip.endDate.split(/[T ]/)[0];
+    const [endYear, endMonth, endDay] = endStr.split('-').map(Number);
+    
+    const start = new Date(startYear, startMonth - 1, startDay);
+    const end = new Date(endYear, endMonth - 1, endDay);
     return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
   };
 

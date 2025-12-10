@@ -65,8 +65,10 @@ export default function TripsScreen() {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateStr = dateString.split(/[T ]/)[0]; // Handle both 'T' and space
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${monthShort[month - 1]} ${day}, ${year}`;
   };
 
   const calculateBudgetPercentage = (spent, budget) => {
@@ -124,10 +126,18 @@ export default function TripsScreen() {
           </View>
           <View style={tripsStyles.tripStat}>
             <Text style={tripsStyles.tripStatValue}>
-              {Math.ceil(
-                (new Date(item.endDate) - new Date(item.startDate)) /
-                (1000 * 60 * 60 * 24)
-              )}
+              {(() => {
+                const startStr = item.startDate.split(/[T ]/)[0];
+                const [startYear, startMonth, startDay] = startStr.split('-').map(Number);
+                
+                const endStr = item.endDate.split(/[T ]/)[0];
+                const [endYear, endMonth, endDay] = endStr.split('-').map(Number);
+                
+                const start = new Date(startYear, startMonth - 1, startDay);
+                const end = new Date(endYear, endMonth - 1, endDay);
+                
+                return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+              })()}
             </Text>
             <Text style={tripsStyles.tripStatLabel}>Days</Text>
           </View>

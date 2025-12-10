@@ -42,36 +42,27 @@ export default function ItineraryTab({ tripId, userId, items, trip, onUpdate }) 
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    const dateStr = dateString.split(/[T ]/)[0]; // Handle both 'T' and space
+    const [year, month, day] = dateStr.split('-');
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
   };
 
   const formatDateShort = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
-    });
+    const dateStr = dateString.split(/[T ]/)[0]; // Handle both 'T' and space
+    const [year, month, day] = dateStr.split('-');
+    
+    const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${monthShort[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
   };
 
   const formatTime = (timeString) => {
     if (!timeString) return null;
 
+    // Simply extract HH:MM from the time string (format: HH:MM:SS)
     const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
+    return `${hours}:${minutes}`;
   };
 
   const handleDeleteItem = (itemId) => {

@@ -17,6 +17,8 @@ export const getUserTrips = async () => {
 
     const data = await response.json();
     if (response.ok) {
+      console.log('===== RECEIVED TRIPS FROM BACKEND =====');
+      console.log('First trip dates:', data.trips[0]?.startDate, data.trips[0]?.endDate);
       return data;
     } else {
       return { error: data.error || "Failed to fetch trips" };
